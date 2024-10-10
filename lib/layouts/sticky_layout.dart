@@ -3,6 +3,10 @@ import '../widgets/header.dart';
 import '../widgets/footer.dart';
 
 class StickyLayout extends StatelessWidget {
+  final String currentPage;
+
+  StickyLayout({required this.currentPage});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +20,7 @@ class StickyLayout extends StatelessWidget {
           style: TextStyle(fontSize: 18),
         ),
       ),
-      bottomNavigationBar: Footer(),
+      bottomNavigationBar: Footer(currentPage: currentPage),
     );
   }
 }

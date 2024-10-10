@@ -42,29 +42,35 @@ class Header extends StatelessWidget {
           Positioned(
             top: 20,
             left: 20,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.notifications_none,
-                  color: Colors.white,
-                  size: 30,
-                ),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context,
+                    '/notifications'); // Điều hướng đến trang thông báo
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    color: Colors.white,
+                    size: 30,
+                  ),
 
-                //Have notice
-                Positioned(
-                  top: 2,
-                  right: 2,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      shape: BoxShape.circle,
+                  //Have notice
+                  Positioned(
+                    top: 2,
+                    right: 2,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

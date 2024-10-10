@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Footer extends StatelessWidget {
+  final String currentPage;
+  Footer({required this.currentPage});
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -12,9 +14,10 @@ class Footer extends StatelessWidget {
           children: [
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.home_outlined),
+                icon: Icon(Icons.home_outlined,color: currentPage == 'home' ? Colors.green : Colors.black,),
                 onPressed: () {
                   // Home
+                  Navigator.pushReplacementNamed(context, '/');
                 },
               ),
             ),
