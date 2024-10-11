@@ -12,6 +12,7 @@ class Header extends StatelessWidget {
         ),
       ),
       height: 200,
+      clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
           Positioned(
