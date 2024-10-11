@@ -71,10 +71,10 @@ class HomeScreen extends StatelessWidget {
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   var user = users[index];
-                  String avatarUrl = user['avatar'] ?? ''; // Lấy URL avatar
+                  String avatarUrl = user['avatar'] ?? '';
                   String userName = user['name']!;
                   String avatarLetter =
-                      userName[0].toUpperCase(); // Lấy chữ cái đầu
+                      userName[0].toUpperCase();
 
                   return Container(
                     margin: EdgeInsets.symmetric(horizontal: 8.0),
@@ -86,13 +86,13 @@ class HomeScreen extends StatelessWidget {
                               avatarUrl.isEmpty ? Colors.lime : null,
                           backgroundImage: avatarUrl.isNotEmpty
                               ? NetworkImage(avatarUrl)
-                              : null, // Nếu có avatar URL thì dùng, nếu không thì để null
+                              : null,
                           child: avatarUrl.isEmpty
                               ? Text(avatarLetter,
                                   style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 20)) // Hiện chữ cái đầu
-                              : null, // Không hiện gì nếu có hình ảnh
+                                      fontSize: 20))
+                              : null,
                         ),
                         SizedBox(height: 5),
                         Text(userName, style: TextStyle(fontSize: 16)),
@@ -124,7 +124,7 @@ class HomeScreen extends StatelessWidget {
                       clipBehavior: Clip.hardEdge,
                       elevation: 3,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start, // Align the date to the top
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Date
                           Container(
@@ -173,7 +173,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   SizedBox(height: 4),
-                                  // Hiển thị thời gian nếu có
                                   Text(
                                     event['time']!.isNotEmpty ? event['time']! : '',
                                     style: TextStyle(
