@@ -52,9 +52,12 @@ class Footer extends StatelessWidget {
               child: IconButton(
                 icon: Icon(
                   Icons.calendar_today_outlined,
+                  color:
+                      currentPage == 'schedule' ? Colors.green : Colors.black,
                 ),
                 onPressed: () {
                   //Calendar
+                  Navigator.pushReplacementNamed(context, '/schedule');
                 },
               ),
             ),
