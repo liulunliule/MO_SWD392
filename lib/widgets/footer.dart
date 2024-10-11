@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Footer extends StatelessWidget {
+  final String currentPage;
+  Footer({required this.currentPage});
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -12,31 +14,45 @@ class Footer extends StatelessWidget {
           children: [
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.home_outlined),
+                icon: Icon(
+                  Icons.home_outlined,
+                  color: currentPage == 'home' ? Colors.green : Colors.black,
+                ),
                 onPressed: () {
                   // Home
+                  Navigator.pushReplacementNamed(context, '/');
                 },
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.search),
+                icon: Icon(
+                  Icons.search,
+                  color: currentPage == 'search' ? Colors.green : Colors.black,
+                ),
                 onPressed: () {
                   //Search
+                  Navigator.pushReplacementNamed(context, '/search');
                 },
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.account_balance_wallet_outlined),
+                icon: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: currentPage == 'wallet' ? Colors.green : Colors.black,
+                ),
                 onPressed: () {
                   //Wallet
+                  Navigator.pushReplacementNamed(context, '/wallet');
                 },
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.calendar_today_outlined),
+                icon: Icon(
+                  Icons.calendar_today_outlined,
+                ),
                 onPressed: () {
                   //Calendar
                 },
