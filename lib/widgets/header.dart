@@ -41,7 +41,7 @@ class Header extends StatelessWidget {
           ),
           // Biểu tượng chuông
           Positioned(
-            top: 20,
+            top: 50,
             left: 20,
             child: GestureDetector(
               onTap: () {
@@ -54,7 +54,7 @@ class Header extends StatelessWidget {
                   Icon(
                     Icons.notifications_none,
                     color: Colors.white,
-                    size: 30,
+                    size: 40,
                   ),
 
                   //Have notice
