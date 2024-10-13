@@ -39,39 +39,50 @@ class Header extends StatelessWidget {
               ),
             ),
           ),
-          // Biểu tượng chuông
           Positioned(
             top: 50,
             left: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context,
-                    '/notifications'); // Điều hướng đến trang thông báo
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    color: Colors.white,
-                    size: 40,
-                  ),
-
-                  //Have notice
-                  Positioned(
-                    top: 2,
-                    right: 2,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        shape: BoxShape.circle,
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/notifications');
+                  },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.notifications_none,
+                        color: Colors.white,
+                        size: 40,
                       ),
-                    ),
+
+                      // Have notice
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  "Hello, User",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
