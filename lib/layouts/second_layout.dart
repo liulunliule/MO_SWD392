@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/header.dart';
 import '../widgets/footer.dart';
 
 class SecondLayout extends StatelessWidget {
@@ -7,7 +6,8 @@ class SecondLayout extends StatelessWidget {
   final Widget body;
   final String currentPage;
 
-  SecondLayout({required this.title, required this.body,required this.currentPage});
+  SecondLayout(
+      {required this.title, required this.body, required this.currentPage});
 
   @override
   Widget build(BuildContext context) {
