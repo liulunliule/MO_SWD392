@@ -1,6 +1,6 @@
-import 'dart:convert'; // Thêm để decode json
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Thêm để thực hiện HTTP request
+import 'package:http/http.dart' as http;
 import '../layouts/second_layout.dart';
 
 class SearchMentorScreen extends StatefulWidget {
@@ -21,34 +21,28 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
   String? selectedPriceOption;
   String minPrice = '0';
   String maxPrice = '9999999999999';
-  String searchQuery = ''; // Biến để lưu trữ từ khóa tìm kiếm
+  String searchQuery = '';
 
-  // Danh sách mentor
   List<Map<String, dynamic>> mentors = [];
 
-  // Hàm fetch data với từ khóa tìm kiếm
   Future<void> _fetchMentors() async {
-    String name = searchQuery; // Dùng searchQuery làm giá trị cho name
+    String name = searchQuery;
     String specializations = '';
     String sort = 'asc';
     final response = await http.get(Uri.parse(
         'http://167.71.220.5:8080/account/search-mentor?name=$name&minPrice=$minPrice&maxPrice=$maxPrice&specializations=$specializations&sort=service.price&sort=$sort'));
 
     if (response.statusCode == 200) {
-      // Parse JSON data và lưu vào biến mentors
       List<dynamic> data = json.decode(response.body)['data'];
       setState(() {
         mentors = data.map((mentor) => mentor as Map<String, dynamic>).toList();
       });
-      if (mentors.isEmpty) {
-        // In ra thông báo "Không có mentor" nếu danh sách trống
-      }
+      if (mentors.isEmpty) {}
     } else {
       throw Exception('Failed to load mentors');
     }
   }
 
-  // Hàm hiển thị dialog lọc
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -59,8 +53,8 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 20), // Thêm padding trên và dưới
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -289,7 +283,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchMentors(); // Gọi API khi màn hình được mở
+    _fetchMentors();
   }
 
   @override
@@ -315,7 +309,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
               child: TextField(
                 onChanged: (value) {
                   setState(() {
-                    searchQuery = value; // Lưu từ khóa tìm kiếm khi thay đổi
+                    searchQuery = value;
                   });
                 },
                 decoration: InputDecoration(
@@ -326,7 +320,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                   contentPadding: EdgeInsets.symmetric(vertical: 15),
                 ),
                 onSubmitted: (value) {
-                  _fetchMentors(); // Gọi lại hàm tìm kiếm khi người dùng nhấn Enter
+                  _fetchMentors();
                 },
               ),
             ),
@@ -335,14 +329,14 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
             top: 15.5,
             right: 16,
             child: Container(
-              margin: EdgeInsets.only(left: 10), // Tạo khoảng cách từ bên trái
+              margin: EdgeInsets.only(left: 10),
               decoration: BoxDecoration(
                 color: Color(0xFFB5ED3D),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
                 onPressed: () {
-                  _showFilterDialog(); // Gọi hàm hiển thị popup khi nhấn vào filter
+                  _showFilterDialog();
                 },
                 icon: Icon(Icons.tune, color: Colors.white),
               ),
@@ -350,11 +344,9 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
           ),
           Positioned(
             top: 80,
-            left: MediaQuery.of(context).size.width *
-                0.125, // Để item chiếm 75% chiều rộng
-            right: MediaQuery.of(context).size.width *
-                0.125, // Để item chiếm 75% chiều rộng
-            bottom: 10, // Khoảng cách từ dưới màn hình
+            left: MediaQuery.of(context).size.width * 0.125,
+            right: MediaQuery.of(context).size.width * 0.125,
+            bottom: 10,
             child: mentors.isEmpty
                 ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
@@ -366,65 +358,53 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        elevation: 10, // Thêm bóng đổ cho card để nổi bật
-                        color: Color(
-                            0xFFF7F9F1), // Màu nền của card (tone xanh lá nhạt)
+                        elevation: 10,
+                        color: Color(0xFFF7F9F1),
                         child: Container(
-                          padding: EdgeInsets.all(0), // Không có padding
+                          padding: EdgeInsets.all(0),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color:
-                                  Color(0xFFB5ED3D), // Viền màu xanh lá nổi bật
-                              width: 2, // Độ dày viền
+                              color: Color(0xFFB5ED3D),
+                              width: 2,
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Avatar (hình vuông, bám sát phía trên khung item)
                               Builder(
                                 builder: (context) {
                                   double width =
-                                      MediaQuery.of(context).size.width *
-                                          0.75; // 75% chiều rộng của màn hình
+                                      MediaQuery.of(context).size.width * 0.75;
                                   return Container(
-                                    width:
-                                        width, // Avatar chiếm 100% chiều rộng của item
-                                    height:
-                                        width, // Chiều cao = chiều rộng, tạo thành hình vuông
+                                    width: width,
+                                    height: width,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(20),
                                         topRight: Radius.circular(20),
-                                        bottomLeft: Radius.circular(
-                                            15), // Bo góc dưới trái
-                                        bottomRight: Radius.circular(
-                                            15), // Bo góc dưới phải
+                                        bottomLeft: Radius.circular(15),
+                                        bottomRight: Radius.circular(15),
                                       ),
                                       image: DecorationImage(
                                         image: NetworkImage(mentor['avatar']),
-                                        fit: BoxFit
-                                            .cover, // Đảm bảo ảnh vừa khít
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   );
                                 },
                               ),
                               SizedBox(height: 15),
-                              // Thông tin Mentor
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0,
-                                    vertical:
-                                        15.0), // Khoảng cách bên trái, phải và dưới
+                                    horizontal: 15.0, vertical: 15.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       mentor['accountName'],
                                       style: TextStyle(
-                                        fontSize: 22, // Tăng cỡ chữ cho tên
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
                                       ),

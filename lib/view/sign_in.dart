@@ -116,7 +116,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           text: "Don't have account ?", color: Colors.grey),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignUpScreen()),);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => const SignUpScreen()),
+                          );
                         },
                         child: TextConstant.subTile1(context,
                             text: "Sign Up", color: Colors.blue),
@@ -155,7 +158,7 @@ class _SignInScreenState extends State<SignInScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'lib/resource/google.png',
+              'assets/images/google.png',
               height: UtilsReponsive.height(18, context),
               width: UtilsReponsive.height(18, context),
             ),

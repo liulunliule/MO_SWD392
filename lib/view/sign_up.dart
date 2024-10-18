@@ -224,17 +224,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             children: <TextSpan>[
                                           TextSpan(
                                               text: 'Your email ',
-                                              style: TextConstant.textStyleDefine(context, size: 13, fontWeight: FontWeight.w500, color: Colors.grey)),
+                                              style:
+                                                  TextConstant.textStyleDefine(
+                                                      context,
+                                                      size: 13,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Colors.grey)),
                                           TextSpan(
                                               text: 'abcxyz@gmail.com',
-                                              style: TextConstant.textStyleDefine(context, size: 13, fontWeight: FontWeight.w500, color: ColorsManager.primary)),
+                                              style:
+                                                  TextConstant.textStyleDefine(
+                                                      context,
+                                                      size: 13,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: ColorsManager
+                                                          .primary)),
                                           TextSpan(
                                               text: ' has been registered',
-                                              style: TextConstant.textStyleDefine(context, size: 13, fontWeight: FontWeight.w500, color: Colors.grey)),
+                                              style:
+                                                  TextConstant.textStyleDefine(
+                                                      context,
+                                                      size: 13,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Colors.grey)),
                                         ])),
-                                         UtilsReponsive.sizedBoxHeight(context),
-                                    TextConstant.subTile2(context, text: 'Please try again',size: 13, fontWeight: FontWeight.w500, color: Colors.grey),
-
+                                    UtilsReponsive.sizedBoxHeight(context),
+                                    TextConstant.subTile2(context,
+                                        text: 'Please try again',
+                                        size: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey),
                                   ],
                                 ),
                               ),
@@ -277,7 +299,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'lib/resource/google.png',
+              'assets/images/google.png',
               height: UtilsReponsive.height(18, context),
               width: UtilsReponsive.height(18, context),
             ),
