@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '/screens/schedule_screen.dart';
+import '/view/sign_in.dart';
+import '/view/sign_up.dart';
 import 'screens/notifications_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_mentor_screen.dart';
 import 'screens/wallet_screen.dart';
-
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -16,6 +18,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => SearchMentorScreen());
       case '/wallet':
         return MaterialPageRoute(builder: (_) => WalletScreen());
+      case '/schedule':
+        return MaterialPageRoute(builder: (_) => ScheduleScreen());
+      case '/signIn':
+        return MaterialPageRoute(builder: (_) => SignInScreen());
+      case '/signUp':
+        return MaterialPageRoute(builder: (_) => SignUpScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());
