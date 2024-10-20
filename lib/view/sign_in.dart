@@ -1,6 +1,10 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mo_swd392/api/auth.dart';
+import 'package:mo_swd392/util/util_common.dart';
 import '/resource/color_const.dart';
 import '/resource/form_field_widget.dart';
 import '/resource/reponsive_utils.dart';
@@ -23,6 +27,40 @@ class _SignInScreenState extends State<SignInScreen> {
   String errorPassword = '';
 
   bool hidePassword = true;
+  bool isLoading = false;
+  AuthApi service = AuthApi();
+
+  Future<void> login() async {
+    if (errorEmail.isEmpty && errorPassword.isEmpty) {
+      setState(() {
+        isLoading = true;
+      });
+      await AuthApi.login(
+              email: emailTextController.text,
+              password: passwordTextController.text)
+          .then((value) {
+        if (value) {
+          log('Login success');
+        }
+        setState(() {
+          isLoading = false;
+        });
+      }).catchError((error) {
+        log('Login fail $error');
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(
+            msg: '${error.message}',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      });
+    }
+  }
 
   bool validationEmail() {
     log('message');
@@ -140,8 +178,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   borderRadius: BorderRadius.circular(20))),
               backgroundColor: WidgetStateProperty.all(ColorsManager.primary),
               padding: WidgetStateProperty.all(const EdgeInsets.all(14))),
-          child: TextConstant.subTile2(context, text: 'SIGN IN'),
-          onPressed: () async {}),
+          child: isLoading
+              ? CupertinoActivityIndicator()
+              : TextConstant.subTile2(context, text: 'SIGN IN'),
+          onPressed: () async {
+            await login();
+          }),
     );
   }
 

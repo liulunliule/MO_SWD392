@@ -1,42 +1,30 @@
 name: mo_swd392
 description: "A new Flutter project."
 
-publish_to: "none"
-=======
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
-
+publish_to: "none" # Prevent accidental publishing to pub.dev.
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.3
+  sdk: ">=3.4.3 <4.0.0" # You can adjust the version if needed.
 
 dependencies:
   flutter:
     sdk: flutter
 
-=======
-  table_calendar: ^3.0.0
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
+  table_calendar: ^3.0.0
+  fluttertoast: ^8.2.8 # This can be added based on your original example.
+  http: # Add this if you need the http package.
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^5.0.0 # Updated version of flutter_lints.
 
 flutter:
-
-=======
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-
   uses-material-design: true
   assets:
     - assets/images/google.png
+    - lib/resource/
