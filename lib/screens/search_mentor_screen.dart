@@ -9,6 +9,7 @@ class SearchMentorScreen extends StatefulWidget {
 }
 
 class _SearchMentorScreenState extends State<SearchMentorScreen> {
+  bool isLoading = true;
   Map<String, bool> selectedFields = {
     "Software Development": true,
     "Data Science": false,
@@ -18,28 +19,59 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
     "AI": false,
   };
 
-  String? selectedPriceOption;
+  String selectedPriceOption = "Ascending";
   String minPrice = '0';
   String maxPrice = '9999999999999';
   String searchQuery = '';
+  String selectedSpecialization = '';
 
   List<Map<String, dynamic>> mentors = [];
 
   Future<void> _fetchMentors() async {
-    String name = searchQuery;
-    String specializations = '';
-    String sort = 'asc';
+    setState(() {
+      isLoading = true; // Start loading
+    });
+    String? sort;
+    if (selectedPriceOption == "Descending") {
+      sort = 'desc';
+    } else {
+      sort = 'asc';
+    }
     final response = await http.get(Uri.parse(
-        'http://167.71.220.5:8080/account/search-mentor?name=$name&minPrice=$minPrice&maxPrice=$maxPrice&specializations=$specializations&sort=service.price&sort=$sort'));
+        'http://167.71.220.5:8080/account/search-mentor?name=$searchQuery&minPrice=$minPrice&maxPrice=$maxPrice&specializations=$selectedSpecialization&sort=service.price&sort=$sort'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body)['data'];
       setState(() {
         mentors = data.map((mentor) => mentor as Map<String, dynamic>).toList();
+        isLoading = false;
       });
+
       if (mentors.isEmpty) {}
     } else {
+      setState(() {
+        isLoading = false; // API has finished loading even on error
+      });
       throw Exception('Failed to load mentors');
+    }
+  }
+
+  List<String> specializationsList = [];
+  Future<void> _fetchSpecializations() async {
+    final response = await http.get(
+        Uri.parse('http://167.71.220.5:8080/account/specialization/get-all'));
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      if (data['code'] == 200) {
+        setState(() {
+          specializationsList = List<String>.from(data['data']);
+        });
+      } else {
+        throw Exception('Failed to load specializations');
+      }
+    } else {
+      throw Exception('Failed to load specializations');
     }
   }
 
@@ -70,43 +102,55 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: selectedFields.keys.map((field) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedFields.updateAll(
-                                  (key, value) => false); // Reset all
-                              selectedFields[field] = true; // Select this field
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 15),
-                            decoration: BoxDecoration(
-                              color: selectedFields[field]!
-                                  ? Color(0xFFB5ED3D) // Green when selected
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: selectedFields[field]!
-                                      ? Colors.green
-                                      : Colors.grey),
-                            ),
-                            child: Text(
-                              field,
-                              style: TextStyle(
-                                color: selectedFields[field]!
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
-                            ),
+
+                    // Loading specializations if not yet loaded
+                    specializationsList.isEmpty
+                        ? Center(child: CircularProgressIndicator())
+                        : Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: specializationsList.map((specialization) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedFields.updateAll(
+                                        (key, value) => false); // Reset all
+                                    selectedFields[specialization] =
+                                        true; // Select this field
+                                    selectedSpecialization = specialization;
+                                  });
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 15),
+                                  decoration: BoxDecoration(
+                                    color: selectedFields[specialization] ??
+                                            false
+                                        ? Color(
+                                            0xFFB5ED3D) // Green when selected
+                                        : Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: selectedFields[specialization] ??
+                                              false
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    specialization,
+                                    style: TextStyle(
+                                      color: selectedFields[specialization] ??
+                                              false
+                                          ? Colors.black
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
+
                     SizedBox(height: 20),
 
                     // Price Sorting Section (Ascending/Descending)
@@ -139,9 +183,10 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                   : Colors.grey[300],
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: selectedPriceOption == "Ascending"
-                                      ? Colors.green
-                                      : Colors.grey),
+                                color: selectedPriceOption == "Ascending"
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
                             ),
                             child: Text(
                               "Ascending",
@@ -169,9 +214,10 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                   : Colors.grey[300],
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: selectedPriceOption == "Descending"
-                                      ? Colors.green
-                                      : Colors.grey),
+                                color: selectedPriceOption == "Descending"
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
                             ),
                             child: Text(
                               "Descending",
@@ -255,19 +301,53 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                     ),
                     SizedBox(height: 20),
 
-                    // Apply Button
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _fetchMentors(); // Fetch mentors after applying filters
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFB5ED3D),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    // Apply and Reset Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Reset Button
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              // Reset all filters to default values
+                              selectedPriceOption = "Ascending";
+                              minPrice = '0';
+                              maxPrice = '9999999999999';
+                              searchQuery = '';
+                              selectedSpecialization = '';
+                              selectedFields.updateAll((key, value) =>
+                                  false); // Clear all specializations
+                            });
+                            Navigator.of(context).pop();
+                            _fetchMentors(); // Fetch mentors after applying Reset
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[300],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            "Reset",
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
-                      ),
-                      child: Text("Apply"),
+
+                        // Apply Button
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _fetchMentors(); // Fetch mentors after applying filters
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFB5ED3D),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text("Apply"),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 10), // Thêm khoảng trống cuối cùng
                   ],
@@ -283,6 +363,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchSpecializations();
     _fetchMentors();
   }
 
@@ -347,112 +428,139 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
             left: MediaQuery.of(context).size.width * 0.125,
             right: MediaQuery.of(context).size.width * 0.125,
             bottom: 10,
-            child: mentors.isEmpty
+            child: isLoading
                 ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: mentors.length,
-                    itemBuilder: (context, index) {
-                      var mentor = mentors[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 10,
-                        color: Color(0xFFF7F9F1),
-                        child: Container(
-                          padding: EdgeInsets.all(0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Color(0xFFB5ED3D),
-                              width: 2,
-                            ),
+                : mentors.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Have no mentor',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black87,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Builder(
-                                builder: (context) {
-                                  double width =
-                                      MediaQuery.of(context).size.width * 0.75;
-                                  return Container(
-                                    width: width,
-                                    height: width,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        topRight: Radius.circular(20),
-                                        bottomLeft: Radius.circular(15),
-                                        bottomRight: Radius.circular(15),
-                                      ),
-                                      image: DecorationImage(
-                                        image: NetworkImage(mentor['avatar']),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 15),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0, vertical: 15.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      mentor['accountName'],
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      mentor['accountEmail'],
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.attach_money,
-                                            size: 18, color: Colors.green),
-                                        SizedBox(width: 5),
-                                        Text(
-                                          'Price: ${mentor['pricePerHour']}',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight:
-                                                FontWeight.bold, // In đậm
-                                            color: Colors.green,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.category,
-                                            size: 18, color: Colors.grey),
-                                        SizedBox(width: 5),
-                                        Text(
-                                          'Specializations: ${mentor['enumList'].join(', ')}',
-                                          style: TextStyle(
-                                              fontSize: 14, color: Colors.grey),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: mentors.length,
+                        itemBuilder: (context, index) {
+                          var mentor = mentors[index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 10,
+                            color: Color(0xFFF7F9F1),
+                            child: Container(
+                              padding: EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Color(0xFFB5ED3D),
+                                  width: 2,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Builder(
+                                    builder: (context) {
+                                      double width =
+                                          MediaQuery.of(context).size.width *
+                                              0.75;
+                                      return Container(
+                                        width: width,
+                                        height: width,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                          ),
+                                          image: DecorationImage(
+                                            image:
+                                                NetworkImage(mentor['avatar']),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(height: 15),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15.0, vertical: 15.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //Specializations
+                                        SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${mentor['enumList'].join(' | ')}',
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.grey),
+                                            ),
+                                          ],
+                                        ),
+                                        //accountName
+                                        Text(
+                                          mentor['accountName'],
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        //accountEmail
+                                        SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.email,
+                                                size: 18,
+                                                color: Colors
+                                                    .grey), // Icon before email
+                                            SizedBox(width: 5),
+                                            Text(
+                                              mentor['accountEmail'],
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        //pricePerHour
+                                        SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.monetization_on,
+                                                size: 18, color: Colors.green),
+                                            SizedBox(width: 5),
+                                            Text(
+                                              'Price: ${mentor['pricePerHour']}',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:
+                                                    FontWeight.bold, // In đậm
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),
