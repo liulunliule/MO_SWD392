@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mo_swd392/screens/mentor_profile_screen.dart';
 import '/screens/schedule_screen.dart';
 import '/view/sign_in.dart';
 import '/view/sign_up.dart';
@@ -18,6 +19,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => SearchMentorScreen());
       case '/wallet':
         return MaterialPageRoute(builder: (_) => WalletScreen());
+      case '/mentorProfile':
+        return MaterialPageRoute(builder: (_) => MentorProfileScreen());
       case '/schedule':
         return MaterialPageRoute(builder: (_) => ScheduleScreen());
       case '/signIn':

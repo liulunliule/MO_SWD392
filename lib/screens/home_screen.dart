@@ -1,40 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../layouts/sticky_layout.dart';
 
-class HomeScreen extends StatelessWidget {
-  List<Map<String, String>> users = [
-    {
-      'name': 'Thuy Lieu',
-      'avatar':
-      'https://img.freepik.com/free-vector/cute-girl-sitting-drinking-milk-cartoon-character-hand-draw-art-illustration_56104-2279.jpg?t=st=1728667081~exp=1728670681~hmac=dd670b3fae49b742d9e48300e452f1994631771fcf348572517b1ed5cfa325cb&w=740'
-    },
-    {
-      'name': 'Van Vinh',
-      'avatar':
-      'https://img.freepik.com/free-vector/cute-man-drinking-coffee-cartoon-vector-icon-illustration-people-drink-icon-concept-isolated-flat_138676-8425.jpg?t=st=1728666973~exp=1728670573~hmac=4672e68ac77a88095fa2b3497b436545d90deacbdf33f691b5555091e27f5503&w=740'
-    },
-    {
-      'name': 'Nhat Huy',
-      'avatar':
-      'https://img.freepik.com/free-vector/cute-cool-boy-dabbing-pose-cartoon-vector-icon-illustration-people-fashion-icon-concept-isolated_138676-5680.jpg?t=st=1728666743~exp=1728670343~hmac=fb79354534b7b2371dcc2a26b5deaff53c4a42331d0f38eb94576ef7c2d59303&w=740'
-    },
-    {
-      'name': 'Minh Dung',
-      'avatar':
-      'https://firebasestorage.googleapis.com/v0/b/mentor-booking-3d46a.appspot.com/o/cd1f017c-ae6c-4e4b-b72c-af0c0cfce31a.jpg?alt=media'
-    },
-    {
-      'name': 'Bao Ngoc',
-      'avatar':
-      'https://img.freepik.com/premium-vector/cute-girl-long-hair-with-pink-sweater-greeting-chibi-kawaii_380474-716.jpg?w=740'
-    },
-    {'name': 'Sungkar', 'avatar': ''},
-    {'name': 'Shireen', 'avatar': ''},
-    {'name': 'John', 'avatar': ''},
-    {'name': 'Hannahsx', 'avatar': ''},
-    {'name': 'Leahaed', 'avatar': ''},
-  ];
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  // List to store API users
+  List<Map<String, dynamic>> users = [];
+
+  // List of schedule events (remains unchanged)
   List<Map<String, String>> schedule = [
     {'date': '23/09', 'title': 'No schedule', 'description': '', 'time': ''},
     {'date': '24/09', 'title': 'No schedule', 'description': '', 'time': ''},
@@ -44,8 +22,38 @@ class HomeScreen extends StatelessWidget {
       'description': 'Discussion',
       'time': '7:00-9:00pm'
     },
-    {'date': '26/09', 'title': 'No schedule', 'description': '', 'time': ''}
+    {'date': '26/09', 'title': 'No schedule', 'description': '', 'time': ''},
   ];
+
+  // Loading state to show a progress indicator while fetching data
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMentors(); // Fetch the mentors on initialization
+  }
+
+  // Fetch the mentors from the API
+  Future<void> fetchMentors() async {
+    final url =
+        "http://167.71.220.5:8080/account/search-mentor?minPrice=0&sort=service.price&sort=asc";
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          users = List<Map<String, dynamic>>.from(data['data']);
+          isLoading = false; // Data loaded
+        });
+      } else {
+        print('Failed to load mentors: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,59 +69,71 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //reschedule
+              // Reschedule
               Text(
                 'Reschedule',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              //List of users
+              // List of users
               Container(
-                height: screenHeight * 0.15, // Responsive height based on screen size
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    var user = users[index];
-                    String avatarUrl = user['avatar'] ?? '';
-                    String userName = user['name']!;
-                    String avatarLetter = userName[0].toUpperCase();
+                height: screenHeight *
+                    0.15, // Responsive height based on screen size
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          var user = users[index];
+                          String avatarUrl = user['avatar'] ?? '';
+                          String userName = user['accountName'] ?? 'Unknown';
+                          String avatarLetter = userName[0].toUpperCase();
 
-                    return Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: screenWidth * 0.08, // Responsive avatar size
-                            backgroundColor: avatarUrl.isEmpty ? Colors.lime : null,
-                            backgroundImage: avatarUrl.isNotEmpty
-                                ? NetworkImage(avatarUrl)
-                                : null,
-                            child: avatarUrl.isEmpty
-                                ? Text(avatarLetter,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: screenWidth * 0.05))
-                                : null,
-                          ),
-                          SizedBox(height: 5),
-                          Text(userName, style: TextStyle(fontSize: screenWidth * 0.04)),
-                        ],
+                          return Container(
+                            margin: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Column(
+                              children: [
+                                CircleAvatar(
+                                  radius: screenWidth *
+                                      0.08, // Responsive avatar size
+                                  backgroundColor:
+                                      avatarUrl.isEmpty ? Colors.lime : null,
+                                  backgroundImage: avatarUrl.isNotEmpty
+                                      ? NetworkImage(avatarUrl)
+                                      : null,
+                                  child: avatarUrl.isEmpty
+                                      ? Text(
+                                          avatarLetter,
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: screenWidth * 0.05),
+                                        )
+                                      : null,
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  userName,
+                                  style:
+                                      TextStyle(fontSize: screenWidth * 0.04),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
               SizedBox(height: 20),
-              //Schedule
+              // Schedule
               Text(
                 'Schedule',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              //List of events
+              // List of events
               Container(
-                height: screenHeight * 0.45, // Responsive height for the schedule list
+                height: screenHeight *
+                    0.45, // Responsive height for the schedule list
                 child: ListView.builder(
                   itemCount: schedule.length,
                   itemBuilder: (context, index) {
@@ -149,7 +169,6 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-
                             // Info
                             Expanded(
                               child: Padding(
@@ -176,7 +195,9 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 4),
                                     Text(
-                                      event['time']!.isNotEmpty ? event['time']! : '',
+                                      event['time']!.isNotEmpty
+                                          ? event['time']!
+                                          : '',
                                       style: TextStyle(
                                         color: Colors.grey[500],
                                         fontSize: screenWidth * 0.035,

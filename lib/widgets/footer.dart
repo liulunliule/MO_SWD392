@@ -66,6 +66,7 @@ class Footer extends StatelessWidget {
                 icon: Icon(Icons.person_outline),
                 onPressed: () {
                   //Profile
+                  Navigator.pushReplacementNamed(context, '/profile');
                 },
               ),
             ),
