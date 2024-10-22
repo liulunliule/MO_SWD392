@@ -21,16 +21,18 @@ class AppRouter {
       case '/wallet':
         return MaterialPageRoute(builder: (_) => WalletScreen());
       case '/mentorProfile':
-        return MaterialPageRoute(builder: (_) => MentorProfileScreen());
+        final accountId = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => MentorProfileScreen(accountId: accountId),
+        );
       case '/schedule':
         return MaterialPageRoute(builder: (_) => ScheduleScreen());
       case '/signIn':
         return MaterialPageRoute(builder: (_) => SignInScreen());
       case '/signUp':
         return MaterialPageRoute(builder: (_) => SignUpScreen());
-      case '/blogDetail': // New route for blog details
-        final blogId =
-            settings.arguments as int; // Get the blog ID from the arguments
+      case '/blogDetail':
+        final blogId = settings.arguments as int;
         return MaterialPageRoute(
           builder: (_) => BlogDetailScreen(blogId: blogId),
         );
