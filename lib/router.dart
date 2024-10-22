@@ -7,7 +7,7 @@ import 'screens/notifications_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_mentor_screen.dart';
 import 'screens/wallet_screen.dart';
-import 'screens/blog_detail_screen.dart'; // Import your blog detail screen
+import 'screens/blog_detail_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -19,7 +19,9 @@ class AppRouter {
       case '/search':
         return MaterialPageRoute(builder: (_) => SearchMentorScreen());
       case '/wallet':
-        return MaterialPageRoute(builder: (_) => WalletScreen());
+        String accessToken = '';
+        return MaterialPageRoute(
+            builder: (_) => WalletScreen(accessToken: accessToken));
       case '/mentorProfile':
         return MaterialPageRoute(builder: (_) => MentorProfileScreen());
       case '/schedule':
