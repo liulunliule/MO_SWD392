@@ -1,6 +1,10 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mo_swd392/api/auth.dart';
+import 'package:mo_swd392/model/request_signup.dart';
 import '/resource/color_const.dart';
 import '/resource/form_field_widget.dart';
 import '/resource/reponsive_utils.dart';
@@ -27,6 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String errorPassword = '';
 
   bool hidePassword = true;
+  bool isLoading = false;
 
   bool validationName() {
     errorName = '';
@@ -35,6 +40,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     setState(() {});
     return errorName.isEmpty;
+  }
+
+  bool validationPassword() {
+    errorPassword = '';
+    if (passwordTextController.text.trim().isEmpty) {
+      errorPassword = 'Password must not empty';
+    }
+    if (passwordTextController.text.trim() !=
+        repasswordTextController.text.trim()) {
+      errorPassword = 'Password confirm not matching';
+    }
+    setState(() {});
+    return errorPassword.isEmpty;
   }
 
   bool validationEmail() {
@@ -58,6 +76,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return regExp.hasMatch(email);
   }
 
+  Future<void> signUp(BuildContext context) async {
+    if (errorEmail.isEmpty && errorName.isEmpty && errorPassword.isEmpty) {
+      setState(() {
+        isLoading = true;
+      });
+      RequestSignUp body = RequestSignUp(
+          name: nameTextController.text,
+          password: passwordTextController.text,
+          email: emailTextController.text);
+      await AuthApi.register(bodyRequest: body).then((value) {
+        if (value) {
+          log('SignUp success');
+        }
+        setState(() {
+          isLoading = false;
+        });
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+            msg: 'Sign up success!',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }).catchError((error) {
+        log('SignUp fail $error');
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(
+            msg: '${error.message}',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,9 +129,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.arrow_back_ios_new_outlined,
-                    color: Colors.grey,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      Icons.arrow_back_ios_new_outlined,
+                      color: Colors.grey,
+                    ),
                   ),
                   UtilsReponsive.sizedBoxHeight(context, value: 30),
                   TextConstant.titleH1(context, text: 'Sign Up'),
@@ -114,7 +179,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   UtilsReponsive.sizedBoxHeight(context, value: 30),
                   FormFieldWidget(
                       controllerEditting: passwordTextController,
-                      setValueFunc: (value) {},
+                      setValueFunc: (value) {
+                        validationPassword();
+                      },
                       borderColor: Colors.grey,
                       labelText: 'PASSWORD',
                       forcusColor: ColorsManager.primary,
@@ -137,7 +204,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   UtilsReponsive.sizedBoxHeight(context, value: 30),
                   FormFieldWidget(
                       controllerEditting: repasswordTextController,
-                      setValueFunc: (value) {},
+                      errorText: errorPassword,
+                      setValueFunc: (value) {
+                        validationPassword();
+                      },
                       borderColor: Colors.grey,
                       labelText: 'CONFIRM PASSWORD',
                       forcusColor: ColorsManager.primary,
@@ -187,101 +257,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   borderRadius: BorderRadius.circular(20))),
               backgroundColor: WidgetStateProperty.all(ColorsManager.primary),
               padding: WidgetStateProperty.all(const EdgeInsets.all(14))),
-          child: TextConstant.subTile2(context, text: 'SIGN UP'),
+          child: isLoading
+              ? CupertinoActivityIndicator()
+              : TextConstant.subTile2(context, text: 'SIGN UP'),
           onPressed: () async {
-            showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                      backgroundColor: Colors.transparent,
-                      contentPadding: EdgeInsets.all(0),
-                      content: Center(
-                          child: Container(
-                        alignment: Alignment.bottomCenter,
-                        height: UtilsReponsive.height(240, context),
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.transparent,
-                        child: Stack(
-                          children: [
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20)),
-                                height: UtilsReponsive.height(200, context),
-                                width: double.infinity,
-                                child: Column(
-                                  children: [
-                                    UtilsReponsive.sizedBoxHeight(context,
-                                        value: 50),
-                                    TextConstant.titleH2(context,
-                                        text: 'OOPS, Sorry'),
-                                    RichText(
-                                        text: TextSpan(
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall,
-                                            children: <TextSpan>[
-                                          TextSpan(
-                                              text: 'Your email ',
-                                              style:
-                                                  TextConstant.textStyleDefine(
-                                                      context,
-                                                      size: 13,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Colors.grey)),
-                                          TextSpan(
-                                              text: 'abcxyz@gmail.com',
-                                              style:
-                                                  TextConstant.textStyleDefine(
-                                                      context,
-                                                      size: 13,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: ColorsManager
-                                                          .primary)),
-                                          TextSpan(
-                                              text: ' has been registered',
-                                              style:
-                                                  TextConstant.textStyleDefine(
-                                                      context,
-                                                      size: 13,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Colors.grey)),
-                                        ])),
-                                    UtilsReponsive.sizedBoxHeight(context),
-                                    TextConstant.subTile2(context,
-                                        text: 'Please try again',
-                                        size: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                                top: 0,
-                                right: 0,
-                                left: 0,
-                                child: Container(
-                                  width: UtilsReponsive.height(80, context),
-                                  height: UtilsReponsive.height(80, context),
-                                  decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: UtilsReponsive.height(50, context),
-                                  ),
-                                ))
-                          ],
-                        ),
-                      )),
-                      // title: ,
-                    ));
+            await signUp(context);
           }),
     );
   }
