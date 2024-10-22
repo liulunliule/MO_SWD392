@@ -7,6 +7,7 @@ import 'screens/notifications_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_mentor_screen.dart';
 import 'screens/wallet_screen.dart';
+import 'screens/blog_detail_screen.dart'; // Import your blog detail screen
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -27,6 +28,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => SignInScreen());
       case '/signUp':
         return MaterialPageRoute(builder: (_) => SignUpScreen());
+      case '/blogDetail': // New route for blog details
+        final blogId =
+            settings.arguments as int; // Get the blog ID from the arguments
+        return MaterialPageRoute(
+          builder: (_) => BlogDetailScreen(blogId: blogId),
+        );
 
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());

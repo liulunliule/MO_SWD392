@@ -9,46 +9,34 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // List to store API users
-  List<Map<String, dynamic>> users = [];
+  // List to store blog data
+  List<Map<String, dynamic>> blogs = [];
 
-  // List of schedule events (remains unchanged)
-  List<Map<String, String>> schedule = [
-    {'date': '23/09', 'title': 'No schedule', 'description': '', 'time': ''},
-    {'date': '24/09', 'title': 'No schedule', 'description': '', 'time': ''},
-    {
-      'date': '25/09',
-      'title': 'Meet a mentor',
-      'description': 'Discussion',
-      'time': '7:00-9:00pm'
-    },
-    {'date': '26/09', 'title': 'No schedule', 'description': '', 'time': ''},
-  ];
-
-  // Loading state to show a progress indicator while fetching data
-  bool isLoading = true;
+  // Loading state for blogs
+  bool isLoadingBlogs = true;
 
   @override
   void initState() {
     super.initState();
-    fetchMentors(); // Fetch the mentors on initialization
+    fetchBlogs(); // Fetch the blogs on initialization
   }
 
-  // Fetch the mentors from the API
-  Future<void> fetchMentors() async {
-    final url =
-        "http://167.71.220.5:8080/account/search-mentor?minPrice=0&sort=service.price&sort=asc";
+  // Fetch blogs from the API
+  Future<void> fetchBlogs() async {
+    final url = "http://167.71.220.5:8080/blog/view/all";
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.body)['data'];
         setState(() {
-          users = List<Map<String, dynamic>>.from(data['data']);
-          isLoading = false; // Data loaded
+          blogs = List<Map<String, dynamic>>.from(data)
+              .where((blog) => blog['isDeleted'] == false)
+              .toList();
+          isLoadingBlogs = false; // Data loaded
         });
       } else {
-        print('Failed to load mentors: ${response.statusCode}');
+        print('Failed to load blogs: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred: $e');
@@ -69,150 +57,124 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Reschedule
+              // Blogs
               Text(
-                'Reschedule',
+                'Blogs',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              // List of users
+              // List of blogs with enhanced styling
               Container(
-                height: screenHeight *
-                    0.15, // Responsive height based on screen size
-                child: isLoading
+                height: screenHeight * 0.6, // Adjust this value as needed
+                child: isLoadingBlogs
                     ? Center(child: CircularProgressIndicator())
                     : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: users.length,
+                        itemCount: blogs.length,
                         itemBuilder: (context, index) {
-                          var user = users[index];
-                          String avatarUrl = user['avatar'] ?? '';
-                          String userName = user['accountName'] ?? 'Unknown';
-                          String avatarLetter = userName[0].toUpperCase();
-
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: screenWidth *
-                                      0.08, // Responsive avatar size
-                                  backgroundColor:
-                                      avatarUrl.isEmpty ? Colors.lime : null,
-                                  backgroundImage: avatarUrl.isNotEmpty
-                                      ? NetworkImage(avatarUrl)
-                                      : null,
-                                  child: avatarUrl.isEmpty
-                                      ? Text(
-                                          avatarLetter,
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: screenWidth * 0.05),
-                                        )
-                                      : null,
+                          final blog = blogs[index];
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigate to blog detail when tapped
+                              Navigator.pushNamed(
+                                context,
+                                '/blogDetail',
+                                arguments: blog['id'],
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Card(
+                                margin: EdgeInsets.symmetric(
+                                    vertical: 10), // Margin for the card
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      20), // Rounded corners
                                 ),
-                                SizedBox(height: 5),
-                                Text(
-                                  userName,
-                                  style:
-                                      TextStyle(fontSize: screenWidth * 0.04),
+                                elevation: 10, // Increased shadow for depth
+                                color: Color(0xFFF7F9F1), // Background color
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                        20), // Match the mentor card style
+                                    border: Border.all(
+                                      color: Color(0xFFB5ED3D), // Border color
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Image for the blog
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                        child: Image.network(
+                                          blog['image'],
+                                          width: double.infinity,
+                                          height: screenHeight * 0.2,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      SizedBox(height: 15),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15.0, vertical: 15.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Blog title
+                                            Text(
+                                              blog['title'],
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize:
+                                                    20, // Adjusted font size
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            SizedBox(height: 10),
+                                            // Blog description
+                                            Text(
+                                              blog['description'],
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize:
+                                                    18, // Adjusted font size
+                                              ),
+                                            ),
+                                            SizedBox(height: 10),
+                                            // Like count
+                                            Row(
+                                              children: [
+                                                Icon(Icons.thumb_up,
+                                                    color: Colors.grey[
+                                                        600]), // Like icon
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  '${blog['likeCount']}',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[500],
+                                                    fontSize:
+                                                        18, // Adjusted font size
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
                           );
                         },
                       ),
-              ),
-              SizedBox(height: 20),
-              // Schedule
-              Text(
-                'Schedule',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              // List of events
-              Container(
-                height: screenHeight *
-                    0.45, // Responsive height for the schedule list
-                child: ListView.builder(
-                  itemCount: schedule.length,
-                  itemBuilder: (context, index) {
-                    final event = schedule[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        elevation: 3,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Date
-                            Container(
-                              width: screenWidth * 0.2,
-                              height: screenHeight * 0.05,
-                              decoration: BoxDecoration(
-                                color: Colors.amber,
-                                borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular(20),
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                event['date']!,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: screenWidth * 0.04,
-                                ),
-                              ),
-                            ),
-                            // Info
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      event['title']!,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: screenWidth * 0.045,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      event['description']!.isNotEmpty
-                                          ? event['description']!
-                                          : 'No description',
-                                      style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: screenWidth * 0.035,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      event['time']!.isNotEmpty
-                                          ? event['time']!
-                                          : '',
-                                      style: TextStyle(
-                                        color: Colors.grey[500],
-                                        fontSize: screenWidth * 0.035,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
