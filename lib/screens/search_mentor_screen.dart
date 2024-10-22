@@ -500,7 +500,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                         Row(
                                           children: [
                                             Text(
-                                              '${mentor['enumList'].join(' | ')}',
+                                              '${mentor['specializationList'].join(' | ')}',
                                               style: TextStyle(
                                                   fontSize: 20,
                                                   color: Colors.grey),
