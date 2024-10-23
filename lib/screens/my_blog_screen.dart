@@ -49,6 +49,30 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
+  // Function to delete a blog
+  Future<void> deleteBlog(String blogId) async {
+    final url =
+        "http://167.71.220.5:8080/blog/delete/$blogId"; // Adjust your delete URL
+    try {
+      String? accessToken = await _storage.read(key: 'accessToken');
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully deleted
+        fetchBlogs(); // Refresh the blog list
+      } else {
+        print('Failed to delete blog: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred while deleting blog: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
@@ -78,7 +102,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                             // Navigate to blog detail when tapped
                             Navigator.pushNamed(
                               context,
-                              '/blogDetail',
+                              '/blogDetail', // Ensure this route is correctly defined
                               arguments: blog['id'],
                             );
                           },
@@ -104,6 +128,11 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                         height:
                                             100, // Fixed height for square image
                                         fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          // Return an empty container if image fails to load
+                                          return Container();
+                                        },
                                       ),
                                     ),
                                   ),
@@ -136,41 +165,74 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                               fontSize: 14,
                                             ),
                                           ),
-                                          SizedBox(height: 5),
-                                          // Like count
+                                          SizedBox(height: 10),
+                                          // Row for Update and Delete buttons
                                           Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             children: [
-                                              Icon(Icons.thumb_up,
-                                                  color: Colors.grey[600]),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                '${blog['likeCount']}',
-                                                style: TextStyle(
-                                                  color: Colors.grey[500],
-                                                  fontSize: 14,
+                                              // Update button
+                                              TextButton(
+                                                onPressed: () {
+                                                  // Navigate to edit blog screen
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    '/editBlog',
+                                                    arguments: blog[
+                                                        'id'], // Pass blog ID
+                                                  );
+                                                },
+                                                child: Text(
+                                                  'Update',
+                                                  style: TextStyle(
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                              SizedBox(width: 10),
+                                              // Delete button
+                                              TextButton(
+                                                onPressed: () {
+                                                  // Confirm deletion
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title:
+                                                          Text('Delete Blog'),
+                                                      content: Text(
+                                                          'Are you sure you want to delete this blog?'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close dialog
+                                                          },
+                                                          child: Text('Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            deleteBlog(blog[
+                                                                'id']); // Call delete function
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close dialog
+                                                          },
+                                                          child: Text('Delete'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                      color: Colors.red),
                                                 ),
                                               ),
                                             ],
                                           ),
                                         ],
-                                      ),
-                                    ),
-                                  ),
-                                  // Edit button
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 10),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        // Navigate to edit blog screen
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/editBlog', // Add route for edit blog
-                                          arguments: blog['id'], // Pass blog ID
-                                        );
-                                      },
-                                      child: Text(
-                                        'Edit',
-                                        style: TextStyle(color: Colors.blue),
                                       ),
                                     ),
                                   ),
