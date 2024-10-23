@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
 
 class Header extends StatelessWidget {
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // Initialize storage
+
+  Future<void> _logout(BuildContext context) async {
+    // Delete the tokens
+    await _storage.delete(key: 'accessToken');
+    await _storage.delete(key: 'refreshToken');
+
+    // Navigate to the sign-in page
+    Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -92,41 +105,23 @@ class Header extends StatelessWidget {
                 ),
                 SizedBox(
                     height:
-                        30), // Add space between the greeting and the buttons
+                        30), // Add space between the greeting and the button
 
-                // Align for the buttons (to the right)
+                // Align for the logout button (to the right)
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Wrap(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/signIn');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text("Login"),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _logout(context); // Call logout function
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/signUp');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text("Sign Up"),
-                      ),
-                    ],
+                    ),
+                    child: Text("Logout"),
                   ),
                 ),
               ],
