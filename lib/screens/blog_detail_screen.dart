@@ -15,7 +15,8 @@ class BlogDetailScreen extends StatefulWidget {
 class _BlogDetailScreenState extends State<BlogDetailScreen> {
   Map<String, dynamic>? blogDetail;
   bool isLoading = true;
-  final TextEditingController _commentController = TextEditingController(); // Controller for comment input
+  final TextEditingController _commentController =
+      TextEditingController(); // Controller for comment input
 
   @override
   void initState() {
@@ -69,16 +70,19 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 children: [
                   // Blog image container
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.2, // 20% of screen height
+                    height: MediaQuery.of(context).size.height *
+                        0.2, // 20% of screen height
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(30), // Rounded corners for the image
+                      borderRadius: BorderRadius.circular(
+                          30), // Rounded corners for the image
                       child: Image.network(
                         blogDetail!['image'],
                         fit: BoxFit.cover,
-                        width: double.infinity, // Fill the width of the container
+                        width:
+                            double.infinity, // Fill the width of the container
                       ),
                     ),
                   ),
@@ -86,7 +90,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   // Title container
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.8), // Lighter green with transparency
+                      color: Colors.green
+                          .withOpacity(0.8), // Lighter green with transparency
                       borderRadius: BorderRadius.circular(30),
                     ),
                     height: 150,
@@ -123,7 +128,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
                                 child: Text(
                                   blogDetail!['title'],
                                   style: TextStyle(
@@ -131,7 +137,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                  textAlign: TextAlign.center, // Align text to the center
+                                  textAlign: TextAlign
+                                      .center, // Align text to the center
                                 ),
                               ),
                               SizedBox(height: 10),
@@ -155,7 +162,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Icon(Icons.thumb_up, color: Colors.black54, size: 24), // Neutral color for icon
+                      Icon(Icons.thumb_up,
+                          color: Colors.black54,
+                          size: 24), // Neutral color for icon
                       SizedBox(width: 5), // Add space between icon and text
                       Text(
                         'Likes: ${blogDetail!['likeCount']}',
@@ -178,11 +187,14 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   blogDetail!['comments'].isEmpty
                       ? Text(
                           'No comments yet.',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 18),
+                          style:
+                              TextStyle(color: Colors.grey[600], fontSize: 18),
                         )
                       : ListView.builder(
-                          shrinkWrap: true, // Allows ListView to take up only as much space as needed
-                          physics: NeverScrollableScrollPhysics(), // Prevents scrolling in the ListView
+                          shrinkWrap:
+                              true, // Allows ListView to take up only as much space as needed
+                          physics:
+                              NeverScrollableScrollPhysics(), // Prevents scrolling in the ListView
                           itemCount: blogDetail!['comments'].length,
                           itemBuilder: (context, index) {
                             final comment = blogDetail!['comments'][index];
@@ -190,19 +202,26 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15), // Rounded corners for the comment
+                                  borderRadius: BorderRadius.circular(
+                                      15), // Rounded corners for the comment
                                 ),
                                 elevation: 2, // Shadow effect
                                 child: Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.person, color: Colors.green[600], size: 24), // User icon
-                                      SizedBox(width: 10), // Space between icon and text
+                                      Icon(Icons.person,
+                                          color: Colors.green[600],
+                                          size: 24), // User icon
+                                      SizedBox(
+                                          width:
+                                              10), // Space between icon and text
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             // User name
                                             Text(
@@ -215,24 +234,31 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                             SizedBox(height: 5),
                                             // Comment text
                                             Text(
-                                              comment['text'], // Displaying the comment text
-                                              style: TextStyle(fontSize: 16, color: Colors.black87),
+                                              comment[
+                                                  'text'], // Displaying the comment text
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.black87),
                                             ),
                                           ],
                                         ),
                                       ),
                                       // Icon buttons for actions
                                       Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           IconButton(
-                                            icon: Icon(Icons.thumb_up_alt_outlined, color: Colors.grey),
+                                            icon: Icon(
+                                                Icons.thumb_up_alt_outlined,
+                                                color: Colors.grey),
                                             onPressed: () {
                                               // Handle like action
                                             },
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.reply, color: Colors.grey),
+                                            icon: Icon(Icons.reply,
+                                                color: Colors.grey),
                                             onPressed: () {
                                               // Handle reply action
                                             },

@@ -144,8 +144,7 @@ class WalletScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightGreen,
                       padding: EdgeInsets.symmetric(vertical: 15),
@@ -162,8 +161,7 @@ class WalletScreen extends StatelessWidget {
                 SizedBox(width: 20),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightGreen,
                       padding: EdgeInsets.symmetric(vertical: 15),
@@ -180,7 +178,6 @@ class WalletScreen extends StatelessWidget {
               ],
             ),
           ),
-
         ],
       ),
     );

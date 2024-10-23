@@ -12,6 +12,7 @@ class Footer extends StatelessWidget {
         height: 60.0,
         child: Row(
           children: [
+            // home
             Expanded(
               child: IconButton(
                 icon: Icon(
@@ -24,6 +25,7 @@ class Footer extends StatelessWidget {
                 },
               ),
             ),
+            // search
             Expanded(
               child: IconButton(
                 icon: Icon(
@@ -36,18 +38,7 @@ class Footer extends StatelessWidget {
                 },
               ),
             ),
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: currentPage == 'wallet' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  //Wallet
-                  Navigator.pushReplacementNamed(context, '/wallet');
-                },
-              ),
-            ),
+            //schedule
             Expanded(
               child: IconButton(
                 icon: Icon(
@@ -61,6 +52,33 @@ class Footer extends StatelessWidget {
                 },
               ),
             ),
+            //blog
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.article_outlined, // New icon for My Blog
+                  color: currentPage == 'myBlog' ? Colors.green : Colors.black,
+                ),
+                onPressed: () {
+                  // My Blog
+                  Navigator.pushReplacementNamed(context, '/myBlog');
+                },
+              ),
+            ),
+            //wallet
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: currentPage == 'wallet' ? Colors.green : Colors.black,
+                ),
+                onPressed: () {
+                  //Wallet
+                  Navigator.pushReplacementNamed(context, '/wallet');
+                },
+              ),
+            ),
+            //profile
             Expanded(
               child: IconButton(
                 icon: Icon(Icons.person_outline),

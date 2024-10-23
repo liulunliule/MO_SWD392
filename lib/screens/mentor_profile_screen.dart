@@ -84,80 +84,79 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          elevation: 5,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            height: 200,
-                            clipBehavior: Clip.hardEdge,
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: -50,
-                                  left: -50,
-                                  child: Container(
-                                    width: 200,
-                                    height: 200,
-                                    decoration: BoxDecoration(
-                                      color: Colors.green[700],
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Nền vuông hoặc hình chữ nhật phía sau
+                            Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              elevation: 5,
+                              margin:
+                                  EdgeInsets.zero, // Loại bỏ margin của Card
+                              child: Container(
+                                width: MediaQuery.of(context)
+                                    .size
+                                    .width, // Khối nền tràn sát ngang
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                Positioned(
-                                  bottom: -20,
-                                  right: -20,
-                                  child: Container(
-                                    width: 150,
-                                    height: 150,
-                                    decoration: BoxDecoration(
-                                      color: Colors.green[700],
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(height: 95),
-                                      CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                          mentorData!['avatar'],
+                                height: 200,
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: -50,
+                                      left: -50,
+                                      child: ClipOval(
+                                        child: Container(
+                                          width: 200,
+                                          height: 200,
+                                          color: Colors.green[700],
                                         ),
-                                        radius: 90,
                                       ),
-
-                                      // Text(
-                                      //   mentorData!['name'] ?? 'No Name',
-                                      //   style: TextStyle(
-                                      //     color: Colors.white,
-                                      //     fontSize: 24,
-                                      //     fontWeight: FontWeight.bold,
-                                      //   ),
-                                      // ),
-                                    ],
+                                    ),
+                                    Positioned(
+                                      bottom: -20,
+                                      right: -20,
+                                      child: ClipOval(
+                                        child: Container(
+                                          width: 150,
+                                          height: 150,
+                                          color: Colors.green[700],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 80,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: ClipOval(
+                                  child: SizedBox(
+                                    width: 180,
+                                    height: 180,
+                                    child: Image.network(
+                                      mentorData!['avatar'],
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
+                        SizedBox(
+                            height:
+                                60), // Thêm khoảng cách để tránh bị đè lên các thành phần khác
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            // CircleAvatar(
-                            //   backgroundImage: NetworkImage(
-                            //     mentorData!['avatar'],
-                            //   ),
-                            //   radius: 50,
-                            // ),
                             SizedBox(height: 10),
                             Text(
                               mentorData!['name'] ?? 'No Name',
