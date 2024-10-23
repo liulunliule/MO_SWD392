@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../layouts/second_layout.dart';
@@ -13,21 +14,26 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  double balance = 0.0; // Initial balance
-  bool isLoading = true; // Loading state
+  double balance = 0.0;
+  bool isLoading = true;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    fetchWalletBalance(); // Fetch balance on init
+    fetchWalletBalance();
   }
 
   Future<void> fetchWalletBalance() async {
     final url = 'http://167.71.220.5:8080/wallet/view';
     try {
+      String? accessToken = await _storage.read(key: 'accessToken');
+
       final response = await http.get(
         Uri.parse(url),
-        headers: {'accessToken': widget.accessToken},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
       );
 
       if (response.statusCode == 200) {
