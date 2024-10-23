@@ -15,6 +15,7 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   double balance = 0.0; // Initial balance
   bool isLoading = true; // Loading state
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   @override
   void initState() {
@@ -25,9 +26,13 @@ class _WalletScreenState extends State<WalletScreen> {
   Future<void> fetchWalletBalance() async {
     final url = 'http://167.71.220.5:8080/wallet/view';
     try {
+      String? accessToken = await _storage.read(key: 'accessToken');
+
       final response = await http.get(
         Uri.parse(url),
-        headers: {'accessToken': widget.accessToken},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -57,6 +62,7 @@ class _WalletScreenState extends State<WalletScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
