@@ -61,10 +61,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         },
       );
 
-      if (response.statusCode == 202) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Blog deleted successfully')),
-        );
+      if (response.statusCode == 202 || response.statusCode == 200) {
         fetchBlogs();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Blog deleted successfully')),
