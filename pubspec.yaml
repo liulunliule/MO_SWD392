@@ -17,9 +17,9 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   url_launcher: ^6.0.20
   font_awesome_flutter: ^10.2.0
-
+  image_picker: ^0.8.5+3
   table_calendar: ^3.0.0
-  fluttertoast: ^8.2.8 # This can be added based on your original example.
+  fluttertoast: ^8.2.8
   http: # Add this if you need the http package.
 
 dev_dependencies:

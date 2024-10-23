@@ -105,6 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height:
                                               100, // Fixed height for square image
                                           fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            // Return an empty container if image fails to load
+                                            return Container();
+                                          },
                                         ),
                                       ),
                                     ),

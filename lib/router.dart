@@ -9,6 +9,7 @@ import 'screens/home_screen.dart';
 import 'screens/search_mentor_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'screens/blog_detail_screen.dart';
+import 'screens/create_blog_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -41,6 +42,8 @@ class AppRouter {
         );
       case '/myBlog':
         return MaterialPageRoute(builder: (_) => MyBlogScreen());
+      case '/createBlog':
+        return MaterialPageRoute(builder: (_) => CreateBlogScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());

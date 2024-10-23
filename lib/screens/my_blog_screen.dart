@@ -51,8 +51,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
 
   // Function to delete a blog
   Future<void> deleteBlog(String blogId) async {
-    final url =
-        "http://167.71.220.5:8080/blog/delete/$blogId"; // Adjust your delete URL
+    final url = "http://167.71.220.5:8080/blog/delete/$blogId";
     try {
       String? accessToken = await _storage.read(key: 'accessToken');
       final response = await http.delete(
@@ -62,14 +61,25 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         },
       );
 
-      if (response.statusCode == 200) {
-        // Successfully deleted
-        fetchBlogs(); // Refresh the blog list
+      if (response.statusCode == 202) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Blog deleted successfully')),
+        );
+        fetchBlogs();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Blog deleted successfully')),
+        );
       } else {
-        print('Failed to delete blog: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to delete blog: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       print('Error occurred while deleting blog: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error occurred while deleting blog')),
+      );
     }
   }
 
@@ -130,8 +140,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          // Return an empty container if image fails to load
-                                          return Container();
+                                          return Container(); // Handle image error
                                         },
                                       ),
                                     ),
@@ -174,7 +183,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                               // Update button
                                               TextButton(
                                                 onPressed: () {
-                                                  // Navigate to edit blog screen
                                                   Navigator.pushNamed(
                                                     context,
                                                     '/editBlog',
@@ -192,7 +200,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                               // Delete button
                                               TextButton(
                                                 onPressed: () {
-                                                  // Confirm deletion
                                                   showDialog(
                                                     context: context,
                                                     builder: (context) =>
@@ -206,17 +213,17 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                           onPressed: () {
                                                             Navigator.of(
                                                                     context)
-                                                                .pop(); // Close dialog
+                                                                .pop();
                                                           },
                                                           child: Text('Cancel'),
                                                         ),
                                                         TextButton(
                                                           onPressed: () {
-                                                            deleteBlog(blog[
-                                                                'id']); // Call delete function
+                                                            deleteBlog(
+                                                                blog['id']);
                                                             Navigator.of(
                                                                     context)
-                                                                .pop(); // Close dialog
+                                                                .pop();
                                                           },
                                                           child: Text('Delete'),
                                                         ),
@@ -247,8 +254,9 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
             // Add Blog Button
             ElevatedButton(
               onPressed: () {
-                // Navigate to add blog screen
-                Navigator.pushNamed(context, '/addBlog');
+                // Navigate to add blog screen using the router
+                Navigator.pushNamed(
+                    context, '/createBlog'); // Route to create a new blog
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15),
