@@ -1,74 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Import FlutterSecureStorage
 import '../layouts/second_layout.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
+  @override
+  _NotificationScreenState createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // Khởi tạo FlutterSecureStorage
+  List<dynamic> notifications = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchNotifications();
+  }
+
+  Future<void> fetchNotifications() async {
+    try {
+      // Lấy accessToken từ storage
+      String? accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken != null) {
+        final response = await http.get(
+          Uri.parse('http://167.71.220.5:8080/notification/all'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          setState(() {
+            notifications = data['data'];
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          print('Failed to load notifications');
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        print('Access token not found');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
       title: 'Notifications',
       currentPage: 'notifications',
-      body: ListView(
-        padding: EdgeInsets.all(16.0),
-        children: [
-          // Example notification items
-          buildNotificationItem(
-            context,
-            message: 'You have a new booking request!',
-            status: 'Processing',
-            time: '9:42 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'You have a new booking request!',
-            status: 'Processing',
-            time: '9:00 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'You have a new booking request!',
-            status: 'Processing',
-            time: '6:00 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'You have a new booking request!',
-            status: 'Processing',
-            time: '5:00 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'Your booking request has been confirmed.',
-            status: 'Successful',
-            time: '4:20 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'Your booking request has been confirmed.',
-            status: 'Successful',
-            time: '4:28 AM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'You have declined the booking request.',
-            status: 'Declined',
-            time: '2:25 PM',
-          ),
-          buildNotificationItem(
-            context,
-            message: 'You have declined the booking request.',
-            status: 'Declined',
-            time: '2:00 PM',
-          ),
-        ],
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : notifications.isEmpty
+              ? Center(child: Text('No notifications available'))
+              : ListView.builder(
+                  padding: EdgeInsets.all(16.0),
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return buildNotificationItem(
+                      context,
+                      message: notification['message'],
+                      status: notification['status'],
+                      time: notification['date'],
+                    );
+                  },
+                ),
     );
   }
 
-  // Widget to build each notification item
   Widget buildNotificationItem(BuildContext context,
-      {required String message,
-        required String status,
-        required String time}) {
+      {required String message, required String status, required String time}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -77,7 +94,8 @@ class NotificationScreen extends StatelessWidget {
           CircleAvatar(
             radius: 24,
             backgroundColor: Colors.grey[300],
-            child: Icon(Icons.person, color: Colors.white), // Placeholder for profile icon
+            child: Icon(Icons.person,
+                color: Colors.white), // Placeholder for profile icon
           ),
           SizedBox(width: 16),
           Expanded(
@@ -100,7 +118,7 @@ class NotificationScreen extends StatelessWidget {
             ),
           ),
           Text(
-            time,
+            formatTime(time),
             style: TextStyle(color: Colors.grey),
           ),
         ],
@@ -108,17 +126,23 @@ class NotificationScreen extends StatelessWidget {
     );
   }
 
-  // Function to determine status color
   Color getStatusColor(String status) {
     switch (status) {
-      case 'Processing':
+      case 'PROCESSING':
         return Colors.orange;
-      case 'Successful':
+      case 'SUCCESSFUL':
         return Colors.green;
-      case 'Declined':
+      case 'PENDING':
+        return Colors.blue;
+      case 'DECLINED':
         return Colors.red;
       default:
-        return Colors.grey; // Default color if status doesn't match
+        return Colors.grey;
     }
+  }
+
+  String formatTime(String time) {
+    final dateTime = DateTime.parse(time);
+    return '${dateTime.hour}:${dateTime.minute} ${dateTime.year}-${dateTime.month}-${dateTime.day}';
   }
 }
