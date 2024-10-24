@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "489219364726",
+    "project_id": "noti-swd392",
+    "storage_bucket": "noti-swd392.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489219364726:android:4972820945c244d500cc57",
+        "android_client_info": {
+          "package_name": "com.example.mo_swd392"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPPry9Wtt4PPsoMTjFN614Y9m68LffiPY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

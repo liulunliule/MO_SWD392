@@ -1,16 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // For secure storage
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class Header extends StatelessWidget {
-  final FlutterSecureStorage _storage =
-      FlutterSecureStorage(); // Initialize storage
+class Header extends StatefulWidget {
+  @override
+  _HeaderState createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus(); // Kiểm tra trạng thái đăng nhập khi khởi tạo
+  }
+
+  Future<void> _checkLoginStatus() async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    setState(() {
+      _isLoggedIn = accessToken != null; // Nếu có token thì đã đăng nhập
+    });
+  }
 
   Future<void> _logout(BuildContext context) async {
-    // Delete the tokens
+    // Xóa các token
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
 
-    // Navigate to the sign-in page
+    // Điều hướng về trang đăng nhập
     Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
 
@@ -28,6 +46,7 @@ class Header extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
+          // Các hình tròn trang trí
           Positioned(
             top: -50,
             left: -50,
@@ -52,21 +71,23 @@ class Header extends StatelessWidget {
               ),
             ),
           ),
+          // Nội dung chính của Header
           Positioned(
             top: 50,
             left: 20,
-            right: 20, // Ensure the content stays within bounds
+            right: 20, // Đảm bảo nội dung nằm trong giới hạn
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Align for the first part (notifications + user greeting)
+                // Hàng đầu tiên: Icon thông báo và chào người dùng
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/notifications');
+                          Navigator.pushNamed(
+                              context, '/notificationsFirebase');
                         },
                         child: Stack(
                           alignment: Alignment.center,
@@ -103,26 +124,59 @@ class Header extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(
-                    height:
-                        30), // Add space between the greeting and the button
+                SizedBox(height: 30), // Khoảng cách giữa hàng chào và các nút
 
-                // Align for the logout button (to the right)
+                // Hàng thứ hai: Nút Logout hoặc Login & Sign Up
                 Align(
                   alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _logout(context); // Call logout function
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text("Logout"),
-                  ),
+                  child: _isLoggedIn
+                      ? ElevatedButton(
+                          onPressed: () {
+                            _logout(context); // Gọi hàm logout
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text("Logout"),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Nút Login
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/signIn');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: Text("Login"),
+                            ),
+                            SizedBox(width: 10),
+                            // Nút Sign Up
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/signUp');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: Text("Sign Up"),
+                            ),
+                          ],
+                        ),
                 ),
               ],
             ),

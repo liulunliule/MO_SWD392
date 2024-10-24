@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mo_swd392/screens/mentor_profile_screen.dart';
 import 'package:mo_swd392/screens/my_blog_screen.dart';
+import 'package:mo_swd392/screens/notifications_firebase_screen.dart';
 import '/screens/schedule_screen.dart';
 import '/view/sign_in.dart';
 import '/view/sign_up.dart';
@@ -18,6 +19,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => HomeScreen());
       case '/notifications':
         return MaterialPageRoute(builder: (_) => NotificationScreen());
+      case '/notificationsFirebase':
+        return MaterialPageRoute(builder: (_) => NotificationFirebaseScreen());
       case '/search':
         return MaterialPageRoute(builder: (_) => SearchMentorScreen());
       case '/wallet':
