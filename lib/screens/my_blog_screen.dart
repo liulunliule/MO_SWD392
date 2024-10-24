@@ -36,9 +36,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body)['data'];
         setState(() {
-          blogs = List<Map<String, dynamic>>.from(data)
-              .where((blog) => blog['isDeleted'] == false)
-              .toList();
+          blogs = List<Map<String, dynamic>>.from(data);
           isLoadingBlogs = false; // Data loaded
         });
       } else {
@@ -49,7 +47,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
-  // Function to delete a blog
+  // Function to delete a blog (mark as deleted)
   Future<void> deleteBlog(String blogId) async {
     final url = "http://167.71.220.5:8080/blog/delete/$blogId";
     try {
@@ -106,12 +104,14 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                         final blog = blogs[index];
                         return GestureDetector(
                           onTap: () {
-                            // Navigate to blog detail when tapped
-                            Navigator.pushNamed(
-                              context,
-                              '/blogDetail', // Ensure this route is correctly defined
-                              arguments: blog['id'],
-                            );
+                            // Navigate to blog detail when tapped, only if not deleted
+                            if (!blog['isDeleted']) {
+                              Navigator.pushNamed(
+                                context,
+                                '/blogDetail',
+                                arguments: blog['id'],
+                              );
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -172,70 +172,87 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 10),
-                                          // Row for Update and Delete buttons
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              // Update button
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pushNamed(
-                                                    context,
-                                                    '/editBlog',
-                                                    arguments: blog[
-                                                        'id'], // Pass blog ID
-                                                  );
-                                                },
-                                                child: Text(
-                                                  'Update',
-                                                  style: TextStyle(
-                                                      color: Colors.blue),
-                                                ),
-                                              ),
-                                              SizedBox(width: 10),
-                                              // Delete button
-                                              TextButton(
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title:
-                                                          Text('Delete Blog'),
-                                                      content: Text(
-                                                          'Are you sure you want to delete this blog?'),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Text('Cancel'),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            deleteBlog(
-                                                                blog['id']);
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Text('Delete'),
-                                                        ),
-                                                      ],
+                                          // If blog is deleted, show "Deleted" label
+                                          blog['isDeleted']
+                                              ? Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      'Deleted',
+                                                      style: TextStyle(
+                                                          color: Colors.red,
+                                                          fontWeight:
+                                                              FontWeight.bold),
                                                     ),
-                                                  );
-                                                },
-                                                child: Text(
-                                                  'Delete',
-                                                  style: TextStyle(
-                                                      color: Colors.red),
+                                                  ],
+                                                )
+                                              : Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    // Update button
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pushNamed(
+                                                          context,
+                                                          '/editBlog',
+                                                          arguments: blog[
+                                                              'id'], // Pass blog ID
+                                                        );
+                                                      },
+                                                      child: Text(
+                                                        'Update',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    // Delete button
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) =>
+                                                              AlertDialog(
+                                                            title: Text(
+                                                                'Delete Blog'),
+                                                            content: Text(
+                                                                'Are you sure you want to delete this blog?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                                child: Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  deleteBlog(blog[
+                                                                          'id']
+                                                                      .toString());
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                                child: Text(
+                                                                    'Delete'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Text(
+                                                        'Delete',
+                                                        style: TextStyle(
+                                                            color: Colors.red),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                            ],
-                                          ),
                                         ],
                                       ),
                                     ),
