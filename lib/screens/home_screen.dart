@@ -46,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
 
     return StickyLayout(
       title: 'Home',
@@ -57,13 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Blogs
+              // Blogs Header
               Text(
                 'Blogs',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              // List of blogs with enhanced styling
+              // List of blogs with redesigned layout
               Container(
                 height: screenHeight * 0.6, // Adjust this value as needed
                 child: isLoadingBlogs
@@ -88,40 +87,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                     vertical: 10), // Margin for the card
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
-                                      20), // Rounded corners
+                                      15), // Rounded corners
                                 ),
-                                elevation: 10, // Increased shadow for depth
-                                color: Color(0xFFF7F9F1), // Background color
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                        20), // Match the mentor card style
-                                    border: Border.all(
-                                      color: Color(0xFFB5ED3D), // Border color
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Image for the blog
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(20),
-                                          topRight: Radius.circular(20),
-                                        ),
+                                elevation: 5, // Shadow for depth
+                                child: Row(
+                                  children: [
+                                    // Image for the blog (Square)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 10), // Added left padding
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
                                         child: Image.network(
                                           blog['image'],
-                                          width: double.infinity,
-                                          height: screenHeight * 0.2,
+                                          width:
+                                              100, // Fixed width for square image
+                                          height:
+                                              100, // Fixed height for square image
                                           fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            // Return an empty container if image fails to load
+                                            return Container();
+                                          },
                                         ),
                                       ),
-                                      SizedBox(height: 15),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15.0, vertical: 15.0),
+                                    ),
+                                    SizedBox(width: 10),
+                                    // Blog details
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -132,21 +128,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize:
-                                                    20, // Adjusted font size
+                                                    18, // Adjusted font size
                                                 color: Colors.black87,
                                               ),
                                             ),
-                                            SizedBox(height: 10),
+                                            SizedBox(height: 5),
                                             // Blog description
                                             Text(
                                               blog['description'],
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: Colors.grey[600],
                                                 fontSize:
-                                                    18, // Adjusted font size
+                                                    14, // Adjusted font size
                                               ),
                                             ),
-                                            SizedBox(height: 10),
+                                            SizedBox(height: 5),
                                             // Like count
                                             Row(
                                               children: [
@@ -159,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: TextStyle(
                                                     color: Colors.grey[500],
                                                     fontSize:
-                                                        18, // Adjusted font size
+                                                        14, // Adjusted font size
                                                   ),
                                                 ),
                                               ],
@@ -167,8 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ],
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

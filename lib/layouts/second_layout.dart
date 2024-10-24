@@ -15,7 +15,9 @@ class SecondLayout extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
         child: AppBar(
-          title: Text(title),
+          title: Text(title,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.green,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
