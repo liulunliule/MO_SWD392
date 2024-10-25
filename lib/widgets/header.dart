@@ -86,8 +86,7 @@ class _HeaderState extends State<Header> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(
-                              context, '/notificationsFirebase');
+                          Navigator.pushNamed(context, '/notifications');
                         },
                         child: Stack(
                           alignment: Alignment.center,

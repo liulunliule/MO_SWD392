@@ -24,9 +24,11 @@ class AuthApi {
     if (response.statusCode == 200) {
       String accessToken = json.decode(response.body)['accessToken'];
       String refreshToken = json.decode(response.body)['refreshToken'];
+      String role = json.decode(response.body)['role'];
       //lưu token vào storage
       await _storage.write(key: 'accessToken', value: accessToken);
       await _storage.write(key: 'refreshToken', value: refreshToken);
+      await _storage.write(key: 'role', value: role);
 
       return true;
     }
