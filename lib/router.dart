@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mo_swd392/screens/achievement_screen.dart';
 import 'package:mo_swd392/screens/mentor_profile_screen.dart';
+import 'package:mo_swd392/screens/profile_screen.dart';
 import '/screens/schedule_screen.dart';
 import '/view/sign_in.dart';
 import '/view/sign_up.dart';
@@ -36,7 +38,10 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => BlogDetailScreen(blogId: blogId),
         );
-
+      case '/profile':
+        return MaterialPageRoute(builder: (_) => ProfileScreen());
+      case '/achievement':
+        return MaterialPageRoute(builder: (_) => AchievementScreen());
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());
     }
