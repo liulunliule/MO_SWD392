@@ -87,6 +87,94 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     }
   }
 
+  Future<void> _deleteComment(int commentId) async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      print('Access token not found');
+      return;
+    }
+
+    final url = "http://167.71.220.5:8080/comment/delete/$commentId";
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        // Show success message
+        _showMessage(responseData['message']);
+        setState(() {
+          blogDetail!['comments']
+              .removeWhere((comment) => comment['id'] == commentId);
+        });
+      } else {
+        final errorData = jsonDecode(response.body);
+        // Show error message
+        _showMessage(errorData['errors'], backgroundColor: Colors.red);
+      }
+    } catch (e) {
+      print('Error occurred while deleting comment: $e');
+    }
+  }
+
+  Future<void> _updateComment(int commentId, String newCommentText) async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      print('Access token not found');
+      return;
+    }
+
+    final url = "http://167.71.220.5:8080/comment/update/$commentId";
+    final body = jsonEncode({"description": newCommentText});
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        // Show success message
+        _showMessage(responseData['message']);
+        setState(() {
+          final commentIndex = blogDetail!['comments']
+              .indexWhere((comment) => comment['id'] == commentId);
+          if (commentIndex != -1) {
+            blogDetail!['comments'][commentIndex]['description'] =
+                newCommentText;
+          }
+        });
+      } else {
+        final errorData = jsonDecode(response.body);
+        // Show error message with red background
+        _showMessage(errorData['errors'], backgroundColor: Colors.red);
+      }
+    } catch (e) {
+      print('Error occurred while updating comment: $e');
+    }
+  }
+
+// Function to show message
+  void _showMessage(String message, {Color? backgroundColor}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+        backgroundColor: backgroundColor ?? Colors.green,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
@@ -220,15 +308,19 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                             MainAxisAlignment.center,
                                         children: [
                                           IconButton(
-                                            icon: Icon(
-                                                Icons.thumb_up_alt_outlined,
-                                                color: Colors.grey),
-                                            onPressed: () {},
+                                            icon: Icon(Icons.delete,
+                                                color: Colors.red),
+                                            onPressed: () async {
+                                              await _deleteComment(
+                                                  comment['id']);
+                                            },
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.reply,
-                                                color: Colors.grey),
-                                            onPressed: () {},
+                                            icon: Icon(Icons.edit,
+                                                color: Colors.blue),
+                                            onPressed: () {
+                                              // Implement update comment functionality
+                                            },
                                           ),
                                         ],
                                       ),
