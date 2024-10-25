@@ -75,17 +75,17 @@ class _FooterState extends State<Footer> {
                 () => Navigator.pushReplacementNamed(context, '/wallet'),
               ),
             // Profile button
-            Expanded(
-              child: IconButton(
-                icon: Icon(Icons.person_outline),
-                onPressed: () {
-                  if (_isLoggedIn) {
-                    Navigator.pushReplacementNamed(context, '/profile');
-                  } else {
-                    Navigator.pushReplacementNamed(context, '/signIn');
-                  }
-                },
-              ),
+            _buildButton(
+              context,
+              Icons.person_outline,
+              'profile',
+              () {
+                if (_isLoggedIn) {
+                  Navigator.pushReplacementNamed(context, '/profile');
+                } else {
+                  Navigator.pushReplacementNamed(context, '/signIn');
+                }
+              },
             ),
           ],
         ),
@@ -93,16 +93,14 @@ class _FooterState extends State<Footer> {
     );
   }
 
-  // Hàm tạo nút IconButton
+  // Function to create an IconButton with color change
   Expanded _buildButton(BuildContext context, IconData icon, String page,
       VoidCallback onPressed) {
     return Expanded(
       child: IconButton(
         icon: Icon(
           icon,
-          color: widget.currentPage == page
-              ? const Color.fromARGB(255, 181, 237, 61)
-              : Colors.black,
+          color: widget.currentPage == page ? Colors.green[400] : Colors.black,
         ),
         onPressed: onPressed,
       ),

@@ -24,12 +24,11 @@ class _HeaderState extends State<Header> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    // Xóa các token
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
-
-    // Điều hướng về trang đăng nhập
-    Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+    await _storage.delete(key: 'role');
+    _checkLoginStatus();
+    // Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
 
   @override
@@ -46,7 +45,6 @@ class _HeaderState extends State<Header> {
       clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
-          // Các hình tròn trang trí
           Positioned(
             top: -50,
             left: -50,
