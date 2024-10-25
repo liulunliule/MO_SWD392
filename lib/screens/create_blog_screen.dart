@@ -2,13 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:path/path.dart' as path;
 import '/resource/color_const.dart';
 import '/resource/form_field_widget.dart';
 import '/resource/reponsive_utils.dart';
 import '/resource/text_style.dart';
 import '../layouts/second_layout.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CreateBlogScreen extends StatefulWidget {
   @override
@@ -65,17 +67,17 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               ),
               SizedBox(height: 16),
 
-              // Image URL input field (Optional)
-              FormFieldWidget(
-                controllerEditting: imageUrlController,
-                labelText: 'Image URL (Optional)',
-                borderColor: Colors.grey,
-                forcusColor: ColorsManager.primary,
-                padding: 20,
-                radiusBorder: 20,
-                setValueFunc: (value) {},
-              ),
-              SizedBox(height: 16),
+              // // Image URL input field (Optional)
+              // FormFieldWidget(
+              //   controllerEditting: imageUrlController,
+              //   labelText: 'Image URL (Optional)',
+              //   borderColor: Colors.grey,
+              //   forcusColor: ColorsManager.primary,
+              //   padding: 20,
+              //   radiusBorder: 20,
+              //   setValueFunc: (value) {},
+              // ),
+              // SizedBox(height: 16),
 
               // File upload button
               Center(
@@ -87,7 +89,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    backgroundColor: ColorsManager.primary, // Green color
+                    backgroundColor: ColorsManager.primary,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -122,10 +124,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(30), // Rounded corners
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    backgroundColor: ColorsManager.primary, // Green color
+                    backgroundColor: ColorsManager.primary,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -148,12 +149,26 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     }
   }
 
+  // Method to upload an image to Firebase Storage
+  Future<String?> _uploadImageToFirebase(File image) async {
+    try {
+      String fileName = path.basename(image.path);
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('blog_images/$fileName');
+      await storageRef.putFile(image);
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
   // Method to create a new blog
   Future<void> _createBlog() async {
     String? accessToken = await _storage.read(key: 'accessToken');
 
     if (accessToken == null) {
-      // Handle the case when the access token is not available
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Access token not available')),
       );
@@ -164,15 +179,17 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       isLoading = true;
     });
 
-    String apiUrl = "http://167.71.220.5:8080/blog/create";
-    String title = titleController.text;
-    String description = descriptionController.text;
-    String imageUrl = imageUrlController.text;
+    // Check if an image is selected and upload it to Firebase
+    String? imageUrl = imageUrlController.text;
+    if (_image != null) {
+      imageUrl = await _uploadImageToFirebase(_image!);
+    }
 
+    String apiUrl = "http://167.71.220.5:8080/blog/create";
     Map<String, dynamic> blogData = {
-      "title": title,
-      "description": description,
-      "image": imageUrl, // This could also be the URL of the uploaded image
+      "title": titleController.text,
+      "description": descriptionController.text,
+      "image": imageUrl ?? "",
     };
 
     try {
@@ -186,19 +203,16 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Blog created successfully
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Blog created successfully')),
         );
-        Navigator.pop(context); // Go back after creating the blog
+        Navigator.pop(context);
       } else {
-        // Handle error response
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to create blog')),
         );
       }
     } catch (e) {
-      // Handle any exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error creating blog: $e')),
       );

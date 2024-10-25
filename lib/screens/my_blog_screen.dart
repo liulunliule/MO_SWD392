@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as path;
 import '../layouts/second_layout.dart';
 
 class MyBlogScreen extends StatefulWidget {
@@ -78,6 +82,17 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
+  // Show the update popup
+  void _showUpdatePopup(Map<String, dynamic> blog) async {
+    bool? result = await showDialog(
+      context: context,
+      builder: (context) => UpdateBlogPopup(blog: blog),
+    );
+    if (result == true) {
+      fetchBlogs(); // Refresh blogs if update was successful
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
@@ -130,10 +145,8 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                       borderRadius: BorderRadius.circular(15),
                                       child: Image.network(
                                         blog['image'],
-                                        width:
-                                            100, // Fixed width for square image
-                                        height:
-                                            100, // Fixed height for square image
+                                        width: 100,
+                                        height: 100,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
@@ -181,9 +194,10 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                     Text(
                                                       'Deleted',
                                                       style: TextStyle(
-                                                          color: Colors.red,
-                                                          fontWeight:
-                                                              FontWeight.bold),
+                                                        color: Colors.red,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ],
                                                 )
@@ -194,12 +208,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                     // Update button
                                                     TextButton(
                                                       onPressed: () {
-                                                        Navigator.pushNamed(
-                                                          context,
-                                                          '/editBlog',
-                                                          arguments: blog[
-                                                              'id'], // Pass blog ID
-                                                        );
+                                                        _showUpdatePopup(blog);
                                                       },
                                                       child: Text(
                                                         'Update',
@@ -286,6 +295,157 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class UpdateBlogPopup extends StatefulWidget {
+  final Map<String, dynamic> blog;
+
+  UpdateBlogPopup({required this.blog});
+
+  @override
+  _UpdateBlogPopupState createState() => _UpdateBlogPopupState();
+}
+
+class _UpdateBlogPopupState extends State<UpdateBlogPopup> {
+  late TextEditingController titleController;
+  late TextEditingController descriptionController;
+  File? _image;
+  bool isLoading = false;
+  final _storage = FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController(text: widget.blog['title']);
+    descriptionController =
+        TextEditingController(text: widget.blog['description']);
+  }
+
+  // Method to pick an image from the gallery
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  // Method to upload an image to Firebase Storage
+  Future<String?> _uploadImageToFirebase(File image) async {
+    try {
+      String fileName = path.basename(image.path);
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('blog_images/$fileName');
+      await storageRef.putFile(image);
+      return await storageRef.getDownloadURL();
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  // Method to update the blog
+  Future<void> _updateBlog() async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Access token not available')),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    String? imageUrl = widget.blog['image'];
+    if (_image != null) {
+      imageUrl = await _uploadImageToFirebase(_image!);
+    }
+
+    String apiUrl = "http://167.71.220.5:8080/blog/update/${widget.blog['id']}";
+    Map<String, dynamic> blogData = {
+      "title": titleController.text,
+      "description": descriptionController.text,
+      "image": imageUrl ?? "",
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(blogData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Blog updated successfully')),
+        );
+        Navigator.pop(context, true); // Return true to indicate success
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update blog')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating blog: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Update Blog'),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text('Upload Image'),
+            ),
+            if (_image != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Image.file(_image!,
+                    height: 150, width: double.infinity, fit: BoxFit.cover),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: isLoading ? null : _updateBlog,
+          child: isLoading
+              ? CircularProgressIndicator(color: Colors.white)
+              : Text('Update'),
+        ),
+      ],
     );
   }
 }
