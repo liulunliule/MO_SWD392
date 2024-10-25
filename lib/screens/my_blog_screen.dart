@@ -1,11 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
+import 'dart:convert';
 import '../layouts/second_layout.dart';
 
 class MyBlogScreen extends StatefulWidget {
@@ -24,7 +20,12 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     fetchBlogs();
   }
 
-  // Fetch blogs from the API
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchBlogs();
+  }
+
   Future<void> fetchBlogs() async {
     final url = "http://167.71.220.5:8080/blog/view/by-account";
     try {
@@ -41,7 +42,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         final data = jsonDecode(response.body)['data'];
         setState(() {
           blogs = List<Map<String, dynamic>>.from(data);
-          isLoadingBlogs = false; // Data loaded
+          isLoadingBlogs = false;
         });
       } else {
         print('Failed to load blogs: ${response.statusCode}');
@@ -51,7 +52,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
-  // Function to delete a blog (mark as deleted)
   Future<void> deleteBlog(String blogId) async {
     final url = "http://167.71.220.5:8080/blog/delete/$blogId";
     try {
@@ -82,17 +82,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
-  // Show the update popup
-  void _showUpdatePopup(Map<String, dynamic> blog) async {
-    bool? result = await showDialog(
-      context: context,
-      builder: (context) => UpdateBlogPopup(blog: blog),
-    );
-    if (result == true) {
-      fetchBlogs(); // Refresh blogs if update was successful
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
@@ -103,13 +92,11 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header for My Blogs
             Text(
               'My Blogs',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            // List of blogs
             Expanded(
               child: isLoadingBlogs
                   ? Center(child: CircularProgressIndicator())
@@ -118,14 +105,16 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                       itemBuilder: (context, index) {
                         final blog = blogs[index];
                         return GestureDetector(
-                          onTap: () {
-                            // Navigate to blog detail when tapped, only if not deleted
+                          onTap: () async {
                             if (!blog['isDeleted']) {
-                              Navigator.pushNamed(
+                              final result = await Navigator.pushNamed(
                                 context,
                                 '/blogDetail',
                                 arguments: blog['id'],
                               );
+                              if (result == true) {
+                                fetchBlogs();
+                              }
                             }
                           },
                           child: Padding(
@@ -138,7 +127,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                               elevation: 5,
                               child: Row(
                                 children: [
-                                  // Image for the blog (Square)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 10),
                                     child: ClipRRect(
@@ -150,13 +138,12 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return Container(); // Handle image error
+                                          return Container();
                                         },
                                       ),
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  // Blog details
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -164,7 +151,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Blog title
                                           Text(
                                             blog['title'],
                                             style: TextStyle(
@@ -174,7 +160,16 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 5),
-                                          // Blog description
+                                          // Display category below the title
+                                          Text(
+                                            '#${blog['category']}',
+                                            style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey[600],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: 5),
                                           Text(
                                             blog['description'],
                                             maxLines: 2,
@@ -185,7 +180,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 10),
-                                          // If blog is deleted, show "Deleted" label
                                           blog['isDeleted']
                                               ? Row(
                                                   mainAxisAlignment:
@@ -194,10 +188,9 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                     Text(
                                                       'Deleted',
                                                       style: TextStyle(
-                                                        color: Colors.red,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
+                                                          color: Colors.red,
+                                                          fontWeight:
+                                                              FontWeight.bold),
                                                     ),
                                                   ],
                                                 )
@@ -205,10 +198,14 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.end,
                                                   children: [
-                                                    // Update button
                                                     TextButton(
                                                       onPressed: () {
-                                                        _showUpdatePopup(blog);
+                                                        Navigator.pushNamed(
+                                                          context,
+                                                          '/updateBlog',
+                                                          arguments: blog['id'],
+                                                        );
+                                                        fetchBlogs();
                                                       },
                                                       child: Text(
                                                         'Update',
@@ -217,7 +214,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                       ),
                                                     ),
                                                     SizedBox(width: 10),
-                                                    // Delete button
                                                     TextButton(
                                                       onPressed: () {
                                                         showDialog(
@@ -274,17 +270,20 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                       },
                     ),
             ),
-            // Add Blog Button
             ElevatedButton(
-              onPressed: () {
-                // Navigate to add blog screen using the router
-                Navigator.pushNamed(
-                    context, '/createBlog'); // Route to create a new blog
+              onPressed: () async {
+                final result =
+                    await Navigator.pushNamed(context, '/createBlog');
+                if (result == true) {
+                  fetchBlogs();
+                }
               },
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: const Color.fromARGB(255, 181, 237, 61),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
               child: Text(
@@ -295,157 +294,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class UpdateBlogPopup extends StatefulWidget {
-  final Map<String, dynamic> blog;
-
-  UpdateBlogPopup({required this.blog});
-
-  @override
-  _UpdateBlogPopupState createState() => _UpdateBlogPopupState();
-}
-
-class _UpdateBlogPopupState extends State<UpdateBlogPopup> {
-  late TextEditingController titleController;
-  late TextEditingController descriptionController;
-  File? _image;
-  bool isLoading = false;
-  final _storage = FlutterSecureStorage();
-
-  @override
-  void initState() {
-    super.initState();
-    titleController = TextEditingController(text: widget.blog['title']);
-    descriptionController =
-        TextEditingController(text: widget.blog['description']);
-  }
-
-  // Method to pick an image from the gallery
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().getImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
-
-  // Method to upload an image to Firebase Storage
-  Future<String?> _uploadImageToFirebase(File image) async {
-    try {
-      String fileName = path.basename(image.path);
-      Reference storageRef =
-          FirebaseStorage.instance.ref().child('blog_images/$fileName');
-      await storageRef.putFile(image);
-      return await storageRef.getDownloadURL();
-    } catch (e) {
-      print("Error uploading image: $e");
-      return null;
-    }
-  }
-
-  // Method to update the blog
-  Future<void> _updateBlog() async {
-    String? accessToken = await _storage.read(key: 'accessToken');
-    if (accessToken == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Access token not available')),
-      );
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    String? imageUrl = widget.blog['image'];
-    if (_image != null) {
-      imageUrl = await _uploadImageToFirebase(_image!);
-    }
-
-    String apiUrl = "http://167.71.220.5:8080/blog/update/${widget.blog['id']}";
-    Map<String, dynamic> blogData = {
-      "title": titleController.text,
-      "description": descriptionController.text,
-      "image": imageUrl ?? "",
-    };
-
-    try {
-      final response = await http.put(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode(blogData),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Blog updated successfully')),
-        );
-        Navigator.pop(context, true); // Return true to indicate success
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update blog')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating blog: $e')),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Update Blog'),
-      content: SingleChildScrollView(
-        child: Column(
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(labelText: 'Title'),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Upload Image'),
-            ),
-            if (_image != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Image.file(_image!,
-                    height: 150, width: double.infinity, fit: BoxFit.cover),
-              ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: isLoading ? null : _updateBlog,
-          child: isLoading
-              ? CircularProgressIndicator(color: Colors.white)
-              : Text('Update'),
-        ),
-      ],
     );
   }
 }

@@ -133,6 +133,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             ),
                                             SizedBox(height: 5),
+                                            // Blog category
+                                            Text(
+                                              '#${blog!['category']}',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontStyle: FontStyle.italic,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                            SizedBox(height: 20),
                                             // Blog description
                                             Text(
                                               blog['description'],

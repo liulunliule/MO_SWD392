@@ -17,7 +17,8 @@ class SecondLayout extends StatelessWidget {
         child: AppBar(
           title: Text(title,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.green,
+          backgroundColor: const Color.fromARGB(255, 181, 237, 61),
+          foregroundColor: Colors.white,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {

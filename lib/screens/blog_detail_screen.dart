@@ -48,8 +48,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     if (_commentController.text.isNotEmpty) {
       setState(() {
         blogDetail!['comments'].add({
-          'user': 'You', // You can replace this with the actual user's name
-          'text': _commentController.text,
+          'authorName':
+              'You', // You can replace this with the actual user's name
+          'description': _commentController.text,
         });
         _commentController.clear(); // Clear the input field after submission
       });
@@ -87,65 +88,27 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  // Title container
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green
-                          .withOpacity(0.8), // Lighter green with transparency
-                      borderRadius: BorderRadius.circular(30),
+                  // Title text only
+                  Center(
+                    child: Text(
+                      blogDetail!['title'],
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    height: 150,
-                    clipBehavior: Clip.hardEdge,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: -50,
-                          left: -50,
-                          child: Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: Colors.green[600], // Darker green
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: -20,
-                          right: -20,
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Colors.green[600], // Darker green
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        // Title
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
-                                child: Text(
-                                  blogDetail!['title'],
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign
-                                      .center, // Align text to the center
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                      ],
+                  ),
+                  SizedBox(
+                      height: 10), // Add some space between title and category
+                  // Blog category
+                  Text(
+                    '#${blogDetail!['category']}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey[600],
                     ),
                   ),
                   SizedBox(height: 20),
@@ -169,7 +132,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                       Text(
                         'Likes: ${blogDetail!['likeCount']}',
                         style: TextStyle(
-                          color: Colors.black54, // Neutral color for text
+                          color: Colors.black54,
                           fontWeight: FontWeight.w600,
                           fontSize: 18,
                         ),
@@ -225,7 +188,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                           children: [
                                             // User name
                                             Text(
-                                              comment['user'] ?? 'Anonymous',
+                                              comment['authorName'] ??
+                                                  'Anonymous',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,
@@ -235,7 +199,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                             // Comment text
                                             Text(
                                               comment[
-                                                  'text'], // Displaying the comment text
+                                                  'description'], // Displaying the comment text
                                               style: TextStyle(
                                                   fontSize: 16,
                                                   color: Colors.black87),

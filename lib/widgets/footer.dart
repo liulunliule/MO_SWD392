@@ -100,7 +100,9 @@ class _FooterState extends State<Footer> {
       child: IconButton(
         icon: Icon(
           icon,
-          color: widget.currentPage == page ? Colors.green : Colors.black,
+          color: widget.currentPage == page
+              ? const Color.fromARGB(255, 181, 237, 61)
+              : Colors.black,
         ),
         onPressed: onPressed,
       ),
