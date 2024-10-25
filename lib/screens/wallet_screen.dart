@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../layouts/second_layout.dart';
+import '../layouts/third_layout.dart';
 
 class WalletScreen extends StatefulWidget {
   final String accessToken;
@@ -66,7 +66,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SecondLayout(
+    return ThirdLayout(
       title: 'Wallet',
       currentPage: 'wallet',
       body: isLoading

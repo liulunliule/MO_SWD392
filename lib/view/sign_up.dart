@@ -32,6 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool hidePassword = true;
   bool isLoading = false;
+  bool isStudent = true;
 
   bool validationName() {
     errorName = '';
@@ -82,6 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         isLoading = true;
       });
       RequestSignUp body = RequestSignUp(
+          role: isStudent ? "STUDENT" : "MENTOR",
           name: nameTextController.text,
           password: passwordTextController.text,
           email: emailTextController.text);
@@ -141,6 +143,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   UtilsReponsive.sizedBoxHeight(context, value: 30),
                   TextConstant.titleH1(context, text: 'Sign Up'),
                   UtilsReponsive.sizedBoxHeight(context, value: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isStudent = true;
+                          });
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(isStudent
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off),
+                            UtilsReponsive.sizedBoxWidth(context, value: 5),
+                            TextConstant.subTile3(context, text: 'Student')
+                          ],
+                        ),
+                      )),
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isStudent = false;
+                          });
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isStudent
+                                  ? Icons.radio_button_off
+                                  : Icons.radio_button_checked,
+                            ),
+                            UtilsReponsive.sizedBoxWidth(context, value: 5),
+                            TextConstant.subTile3(context, text: 'Mentor')
+                          ],
+                        ),
+                      ))
+                    ],
+                  ),
+                  UtilsReponsive.sizedBoxHeight(context, value: 20),
                   FormFieldWidget(
                       errorText: errorEmail,
                       controllerEditting: emailTextController,

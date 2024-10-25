@@ -4,33 +4,28 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Import FlutterSecureStorage
 import '../layouts/second_layout.dart';
 
-class NotificationScreen extends StatefulWidget {
+class NotificationFirebaseScreen extends StatefulWidget {
   @override
-  _NotificationScreenState createState() => _NotificationScreenState();
+  _NotificationFirebaseScreenState createState() =>
+      _NotificationFirebaseScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+class _NotificationFirebaseScreenState
+    extends State<NotificationFirebaseScreen> {
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // Khởi tạo FlutterSecureStorage
   List<dynamic> notifications = [];
   bool isLoading = true;
-  String? role;
 
   @override
   void initState() {
     super.initState();
-    fetchUserRole(); // Fetch user role first
-  }
-
-  Future<void> fetchUserRole() async {
-    String? storedRole = await _storage.read(key: 'role');
-    setState(() {
-      role = storedRole;
-    });
     fetchNotifications();
   }
 
   Future<void> fetchNotifications() async {
     try {
+      // Lấy accessToken từ storage
       String? accessToken = await _storage.read(key: 'accessToken');
       if (accessToken != null) {
         final response = await http.get(
@@ -66,38 +61,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  Future<void> approveNotification(int id) async {
-    try {
-      String? accessToken = await _storage.read(key: 'accessToken');
-      final url = 'http://167.71.220.5:8080/mentor/booking/approve/$id';
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        print("Notification approved successfully.");
-        fetchNotifications(); // Refresh notifications after approval
-      } else {
-        print("Failed to approve notification: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error approving notification: $e");
-    }
-  }
-
-  void rejectNotification(int index) {
-    // Implement your rejection logic here
-    print("Rejected notification at index: $index");
-  }
-
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
-      title: 'Notifications',
-      currentPage: 'notifications',
+      title: 'Notifications Firebase',
+      currentPage: 'notificationsFirebase',
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : notifications.isEmpty
@@ -109,25 +77,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     final notification = notifications[index];
                     return buildNotificationItem(
                       context,
-                      index: index,
                       message: notification['message'],
                       status: notification['status'],
                       time: notification['date'],
-                      id: notification['id'],
                     );
                   },
                 ),
     );
   }
 
-  Widget buildNotificationItem(
-    BuildContext context, {
-    required int index,
-    required String message,
-    required String status,
-    required String time,
-    required int id,
-  }) {
+  Widget buildNotificationItem(BuildContext context,
+      {required String message, required String status, required String time}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -136,7 +96,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           CircleAvatar(
             radius: 24,
             backgroundColor: Colors.grey[300],
-            child: Icon(Icons.person, color: Colors.white),
+            child: Icon(Icons.person,
+                color: Colors.white), // Placeholder for profile icon
           ),
           SizedBox(width: 16),
           Expanded(
@@ -145,44 +106,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
               children: [
                 Text(
                   message,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          status,
-                          style: TextStyle(color: getStatusColor(status)),
-                        ),
-                        Text(
-                          formatTime(time),
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    if (status == 'PROCESSING' && role == 'MENTOR')
-                      Row(
-                        children: [
-                          TextButton(
-                            onPressed: () => approveNotification(id),
-                            child: Text('Approve',
-                                style: TextStyle(color: Colors.green)),
-                          ),
-                          TextButton(
-                            onPressed: () => rejectNotification(index),
-                            child: Text('Reject',
-                                style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
-                  ],
+                Text(
+                  status,
+                  style: TextStyle(color: getStatusColor(status)),
                 ),
               ],
             ),
+          ),
+          Text(
+            formatTime(time),
+            style: TextStyle(color: Colors.grey),
           ),
         ],
       ),

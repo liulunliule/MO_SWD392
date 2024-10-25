@@ -1,8 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class Footer extends StatelessWidget {
+class Footer extends StatefulWidget {
   final String currentPage;
+
   Footer({required this.currentPage});
+
+  @override
+  _FooterState createState() => _FooterState();
+}
+
+class _FooterState extends State<Footer> {
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    setState(() {
+      _isLoggedIn = (accessToken != null);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -12,84 +36,73 @@ class Footer extends StatelessWidget {
         height: 60.0,
         child: Row(
           children: [
-            // home
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.home_outlined,
-                  color: currentPage == 'home' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  // Home
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-              ),
+            // Home button
+            _buildButton(
+              context,
+              Icons.home_outlined,
+              'home',
+              () => Navigator.pushReplacementNamed(context, '/'),
             ),
-            // search
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.search,
-                  color: currentPage == 'search' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  //Search
-                  Navigator.pushReplacementNamed(context, '/search');
-                },
-              ),
+            // Search button
+            _buildButton(
+              context,
+              Icons.search,
+              'search',
+              () => Navigator.pushReplacementNamed(context, '/search'),
             ),
-            //schedule
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.calendar_today_outlined,
-                  color:
-                      currentPage == 'schedule' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  //Calendar
-                  Navigator.pushReplacementNamed(context, '/schedule');
-                },
+            // Schedule button (only visible if logged in)
+            if (_isLoggedIn)
+              _buildButton(
+                context,
+                Icons.calendar_today_outlined,
+                'schedule',
+                () => Navigator.pushReplacementNamed(context, '/schedule'),
               ),
-            ),
-            //blog
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.article_outlined, // New icon for My Blog
-                  color: currentPage == 'myBlog' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  // My Blog
-                  Navigator.pushReplacementNamed(context, '/myBlog');
-                },
+            // Blog button (only visible if logged in)
+            if (_isLoggedIn)
+              _buildButton(
+                context,
+                Icons.article_outlined,
+                'myBlog',
+                () => Navigator.pushReplacementNamed(context, '/myBlog'),
               ),
-            ),
-            //wallet
-            Expanded(
-              child: IconButton(
-                icon: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: currentPage == 'wallet' ? Colors.green : Colors.black,
-                ),
-                onPressed: () {
-                  //Wallet
-                  Navigator.pushReplacementNamed(context, '/wallet');
-                },
+            // Wallet button (only visible if logged in)
+            if (_isLoggedIn)
+              _buildButton(
+                context,
+                Icons.account_balance_wallet_outlined,
+                'wallet',
+                () => Navigator.pushReplacementNamed(context, '/wallet'),
               ),
-            ),
-            //profile
-            Expanded(
-              child: IconButton(
-                icon: Icon(Icons.person_outline),
-                onPressed: () {
-                  //Profile
+            // Profile button
+            _buildButton(
+              context,
+              Icons.person_outline,
+              'profile',
+              () {
+                if (_isLoggedIn) {
                   Navigator.pushReplacementNamed(context, '/profile');
-                },
-              ),
+                } else {
+                  Navigator.pushReplacementNamed(context, '/signIn');
+                }
+              },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Function to create an IconButton with color change
+  Expanded _buildButton(BuildContext context, IconData icon, String page,
+      VoidCallback onPressed) {
+    return Expanded(
+      child: IconButton(
+        icon: Icon(
+          icon,
+          color: widget.currentPage == page ? Colors.green[400] : Colors.black,
+        ),
+        onPressed: onPressed,
       ),
     );
   }

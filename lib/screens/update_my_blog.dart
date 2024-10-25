@@ -12,27 +12,31 @@ import '/resource/reponsive_utils.dart';
 import '/resource/text_style.dart';
 import '../layouts/second_layout.dart';
 
-class CreateBlogScreen extends StatefulWidget {
+class UpdateMyBlogScreen extends StatefulWidget {
+  final int blogId; // Accept blog ID as a parameter
+
+  UpdateMyBlogScreen({required this.blogId});
+
   @override
-  _CreateBlogScreenState createState() => _CreateBlogScreenState();
+  _UpdateMyBlogScreenState createState() => _UpdateMyBlogScreenState();
 }
 
-class _CreateBlogScreenState extends State<CreateBlogScreen> {
+class _UpdateMyBlogScreenState extends State<UpdateMyBlogScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final _storage = FlutterSecureStorage();
-
   File? _image;
-  bool isLoading = false;
-
-  List<String> categories = [];
+  String? _currentImageUrl;
   String? selectedCategory;
+  bool isLoading = false;
+  List<String> categories = [];
   Map<String, bool> selectedFields = {};
 
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
+    fetchBlogDetails(); // Fetch blog details to populate the fields
+    _fetchCategories(); // Fetch categories
   }
 
   // Fetch categories from the API
@@ -46,18 +50,54 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         setState(() {
           categories = List<String>.from(data['data']);
           for (var category in categories) {
-            selectedFields[category] = false;
+            selectedFields[category] = false; // Initialize selection state
           }
         });
       }
     }
   }
 
+  // Fetch the blog details
+  Future<void> fetchBlogDetails() async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    final url = "http://167.71.220.5:8080/blog/view/${widget.blogId}";
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final blogData = jsonDecode(response.body)['data'];
+        setState(() {
+          titleController.text = blogData['title'];
+          descriptionController.text = blogData['description'];
+          _currentImageUrl = blogData['image'];
+          selectedCategory = blogData['category']; // Set the current category
+          if (selectedCategory != null) {
+            selectedFields[selectedCategory!] = true; // Mark as selected
+          }
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch blog details')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching blog details: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SecondLayout(
-      title: 'Create Blog',
-      currentPage: 'create blog',
+      title: 'Update Blog',
+      currentPage: 'update blog',
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -65,7 +105,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Create Your Blog',
+                'Update Your Blog',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
@@ -93,6 +133,22 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 setValueFunc: (value) {},
               ),
               SizedBox(height: 16),
+              if (_currentImageUrl != null && _image == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      _currentImageUrl!,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(); // Handle image loading error
+                      },
+                    ),
+                  ),
+                ),
 
               // Category selection
               Text(
@@ -140,13 +196,11 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 }).toList(),
               ),
 
-              SizedBox(height: 20),
-
               // File upload button
               Center(
                 child: ElevatedButton(
                   onPressed: _pickImage,
-                  child: Text('Upload Image'),
+                  child: Text('Upload New Image (Optional)'),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -175,15 +229,15 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
               SizedBox(height: 20),
 
-              // Create Blog button
+              // Update Blog button
               Center(
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : _createBlog,
+                  onPressed: isLoading ? null : _updateBlog,
                   child: isLoading
                       ? CircularProgressIndicator(
                           color: Colors.white,
                         )
-                      : Text('Create Blog'),
+                      : Text('Update Blog'),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -227,8 +281,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     }
   }
 
-  // Method to create a new blog
-  Future<void> _createBlog() async {
+  Future<void> _updateBlog() async {
     String? accessToken = await _storage.read(key: 'accessToken');
 
     if (accessToken == null) {
@@ -242,22 +295,25 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       isLoading = true;
     });
 
-    // Check if an image is selected and upload it to Firebase
+    // Upload image if a new one is selected, else use the existing image URL
     String? imageUrl;
     if (_image != null) {
       imageUrl = await _uploadImageToFirebase(_image!);
+    } else {
+      imageUrl =
+          _currentImageUrl; // Use the existing image if no new image is uploaded
     }
 
-    String apiUrl = "http://167.71.220.5:8080/blog/create";
+    String apiUrl = "http://167.71.220.5:8080/blog/update/${widget.blogId}";
     Map<String, dynamic> blogData = {
       "title": titleController.text,
       "description": descriptionController.text,
-      "blogCategoryEnum": selectedCategory, // Include selected category
-      "image": imageUrl ?? "",
+      "image": imageUrl ?? "", // Use the existing or new image URL
+      "blogCategoryEnum": selectedCategory ?? "", // Add selected category
     };
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
@@ -268,17 +324,17 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Blog created successfully')),
+          SnackBar(content: Text('Blog updated successfully')),
         );
         Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create blog')),
+          SnackBar(content: Text('Failed to update blog')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating blog: $e')),
+        SnackBar(content: Text('Error updating blog: $e')),
       );
     } finally {
       setState(() {

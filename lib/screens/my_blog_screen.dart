@@ -20,7 +20,12 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     fetchBlogs();
   }
 
-  // Fetch blogs from the API
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchBlogs();
+  }
+
   Future<void> fetchBlogs() async {
     final url = "http://167.71.220.5:8080/blog/view/by-account";
     try {
@@ -37,7 +42,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         final data = jsonDecode(response.body)['data'];
         setState(() {
           blogs = List<Map<String, dynamic>>.from(data);
-          isLoadingBlogs = false; // Data loaded
+          isLoadingBlogs = false;
         });
       } else {
         print('Failed to load blogs: ${response.statusCode}');
@@ -47,7 +52,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     }
   }
 
-  // Function to delete a blog (mark as deleted)
   Future<void> deleteBlog(String blogId) async {
     final url = "http://167.71.220.5:8080/blog/delete/$blogId";
     try {
@@ -88,13 +92,11 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header for My Blogs
             Text(
               'My Blogs',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            // List of blogs
             Expanded(
               child: isLoadingBlogs
                   ? Center(child: CircularProgressIndicator())
@@ -103,14 +105,16 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                       itemBuilder: (context, index) {
                         final blog = blogs[index];
                         return GestureDetector(
-                          onTap: () {
-                            // Navigate to blog detail when tapped, only if not deleted
+                          onTap: () async {
                             if (!blog['isDeleted']) {
-                              Navigator.pushNamed(
+                              final result = await Navigator.pushNamed(
                                 context,
                                 '/blogDetail',
                                 arguments: blog['id'],
                               );
+                              if (result == true) {
+                                fetchBlogs();
+                              }
                             }
                           },
                           child: Padding(
@@ -123,27 +127,23 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                               elevation: 5,
                               child: Row(
                                 children: [
-                                  // Image for the blog (Square)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 10),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: Image.network(
                                         blog['image'],
-                                        width:
-                                            100, // Fixed width for square image
-                                        height:
-                                            100, // Fixed height for square image
+                                        width: 100,
+                                        height: 100,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return Container(); // Handle image error
+                                          return Container();
                                         },
                                       ),
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  // Blog details
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -151,7 +151,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Blog title
                                           Text(
                                             blog['title'],
                                             style: TextStyle(
@@ -161,7 +160,16 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 5),
-                                          // Blog description
+                                          // Display category below the title
+                                          Text(
+                                            '#${blog['category']}',
+                                            style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey[600],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: 5),
                                           Text(
                                             blog['description'],
                                             maxLines: 2,
@@ -172,7 +180,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 10),
-                                          // If blog is deleted, show "Deleted" label
                                           blog['isDeleted']
                                               ? Row(
                                                   mainAxisAlignment:
@@ -191,15 +198,14 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.end,
                                                   children: [
-                                                    // Update button
                                                     TextButton(
                                                       onPressed: () {
                                                         Navigator.pushNamed(
                                                           context,
-                                                          '/editBlog',
-                                                          arguments: blog[
-                                                              'id'], // Pass blog ID
+                                                          '/updateBlog',
+                                                          arguments: blog['id'],
                                                         );
+                                                        fetchBlogs();
                                                       },
                                                       child: Text(
                                                         'Update',
@@ -208,7 +214,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                       ),
                                                     ),
                                                     SizedBox(width: 10),
-                                                    // Delete button
                                                     TextButton(
                                                       onPressed: () {
                                                         showDialog(
@@ -265,17 +270,20 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                       },
                     ),
             ),
-            // Add Blog Button
             ElevatedButton(
-              onPressed: () {
-                // Navigate to add blog screen using the router
-                Navigator.pushNamed(
-                    context, '/createBlog'); // Route to create a new blog
+              onPressed: () async {
+                final result =
+                    await Navigator.pushNamed(context, '/createBlog');
+                if (result == true) {
+                  fetchBlogs();
+                }
               },
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: const Color.fromARGB(255, 181, 237, 61),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
               child: Text(
