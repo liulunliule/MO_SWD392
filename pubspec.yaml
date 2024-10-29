@@ -10,20 +10,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.4
-  flutter_secure_storage: ^8.0.0
-
+  flutter_secure_storage: ^9.2.2
   table_calendar: ^3.0.0
-  fluttertoast: ^8.2.8 # This can be added based on your original example.
-  http: # Add this if you need the http package.
-
+  fluttertoast: ^8.2.8
+  http: ^1.2.2
+  googleapis: any # Thêm nếu bạn đang sử dụng Google APIs
+  googleapis_auth: any # Thêm nếu bạn đang sử dụng Google APIs Auth
+  intl: ^0.17.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0 # Updated version of flutter_lints.
+  flutter_lints: ^5.0.0 # Phiên bản đã cập nhật của flutter_lints.
 
 flutter:
   uses-material-design: true

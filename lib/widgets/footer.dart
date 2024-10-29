@@ -63,7 +63,9 @@ class Footer extends StatelessWidget {
             ),
             Expanded(
               child: IconButton(
-                icon: Icon(Icons.person_outline),
+                icon: Icon(Icons.person_outline, 
+               color:  currentPage == 'profile' ? Colors.green : Colors.black,
+                ),
                 onPressed: () {
                   //Profile
                   Navigator.pushReplacementNamed(context, '/profile');

@@ -31,7 +31,7 @@ class _SignInScreenState extends State<SignInScreen> {
   AuthApi service = AuthApi();
 
   Future<void> login() async {
-    if (errorEmail.isEmpty && errorPassword.isEmpty) {
+    // if (errorEmail.isEmpty && errorPassword.isEmpty) {
       setState(() {
         isLoading = true;
       });
@@ -57,10 +57,10 @@ class _SignInScreenState extends State<SignInScreen> {
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
             backgroundColor: Colors.red,
-            textColor: Colors.white,
+            textColor: const Color.fromARGB(255, 255, 126, 126),
             fontSize: 16.0);
       });
-    }
+    // }
   }
 
   bool validationEmail() {

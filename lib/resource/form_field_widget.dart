@@ -26,8 +26,8 @@ class FormFieldWidget extends StatelessWidget {
       this.paddingVerti = 0,
       this.fillColor = Colors.white,
       this.directLTR = true,
-      this.borderColor = Colors.white,
-      this.forcusColor = Colors.white,
+      this.borderColor = Colors.black,
+      this.forcusColor = Colors.black,
       this.isCenter = false
       });
   final FocusNode? focusNode;
