@@ -9,17 +9,20 @@ class Header extends StatefulWidget {
 class _HeaderState extends State<Header> {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   bool _isLoggedIn = false;
+  String userName = "User";
 
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus(); // Kiểm tra trạng thái đăng nhập khi khởi tạo
+    _checkLoginStatus();
   }
 
   Future<void> _checkLoginStatus() async {
     String? accessToken = await _storage.read(key: 'accessToken');
+    String? storedName = await _storage.read(key: 'name');
     setState(() {
-      _isLoggedIn = accessToken != null; // Nếu có token thì đã đăng nhập
+      _isLoggedIn = accessToken != null;
+      userName = storedName ?? "User";
     });
   }
 
@@ -28,7 +31,6 @@ class _HeaderState extends State<Header> {
     await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'role');
     _checkLoginStatus();
-    // Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
 
   @override
@@ -69,15 +71,13 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
-          // Nội dung chính của Header
           Positioned(
             top: 50,
             left: 20,
-            right: 20, // Đảm bảo nội dung nằm trong giới hạn
+            right: 20,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hàng đầu tiên: Icon thông báo và chào người dùng
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Row(
@@ -111,7 +111,7 @@ class _HeaderState extends State<Header> {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        "Hello, User",
+                        "Hello, $userName",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -121,15 +121,13 @@ class _HeaderState extends State<Header> {
                     ],
                   ),
                 ),
-                SizedBox(height: 30), // Khoảng cách giữa hàng chào và các nút
-
-                // Hàng thứ hai: Nút Logout hoặc Login & Sign Up
+                SizedBox(height: 30),
                 Align(
                   alignment: Alignment.centerRight,
                   child: _isLoggedIn
                       ? ElevatedButton(
                           onPressed: () {
-                            _logout(context); // Gọi hàm logout
+                            _logout(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
@@ -143,7 +141,7 @@ class _HeaderState extends State<Header> {
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Nút Login
+                            // Login
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.pushNamed(context, '/signIn');
@@ -158,7 +156,7 @@ class _HeaderState extends State<Header> {
                               child: Text("Login"),
                             ),
                             SizedBox(width: 10),
-                            // Nút Sign Up
+                            //Sign Up
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.pushNamed(context, '/signUp');

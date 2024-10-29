@@ -18,11 +18,18 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   Map<String, dynamic>? blogDetail;
   bool isLoading = true;
   final TextEditingController _commentController = TextEditingController();
+  String? storedName; // Variable to hold the stored name
 
   @override
   void initState() {
     super.initState();
     fetchBlogDetail();
+    _getStoredName(); // Retrieve stored name
+  }
+
+  Future<void> _getStoredName() async {
+    storedName = await _storage.read(key: 'name') ??
+        'Anonymous'; // Fallback to 'Anonymous' if not found
   }
 
   Future<void> fetchBlogDetail() async {
@@ -65,7 +72,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
       if (response.statusCode == 200) {
         final newComment = {
-          'authorName': 'You',
+          'authorName': storedName, // Use stored name
           'description': commentText,
         };
         setState(() {
@@ -76,14 +83,6 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       }
     } catch (e) {
       print('Error occurred while posting comment: $e');
-    }
-  }
-
-  void _addComment() {
-    final commentText = _commentController.text;
-    if (commentText.isNotEmpty) {
-      _postComment(commentText);
-      _commentController.clear();
     }
   }
 
@@ -105,72 +104,32 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        // Show success message
-        _showMessage(responseData['message']);
         setState(() {
           blogDetail!['comments']
               .removeWhere((comment) => comment['id'] == commentId);
         });
+        _showMessage('Comment deleted successfully!');
       } else {
-        final errorData = jsonDecode(response.body);
-        // Show error message
-        _showMessage(errorData['errors'], backgroundColor: Colors.red);
+        print('Failed to delete comment: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred while deleting comment: $e');
     }
   }
 
-  Future<void> _updateComment(int commentId, String newCommentText) async {
-    String? accessToken = await _storage.read(key: 'accessToken');
-    if (accessToken == null) {
-      print('Access token not found');
-      return;
-    }
-
-    final url = "http://167.71.220.5:8080/comment/update/$commentId";
-    final body = jsonEncode({"description": newCommentText});
-
-    try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        // Show success message
-        _showMessage(responseData['message']);
-        setState(() {
-          final commentIndex = blogDetail!['comments']
-              .indexWhere((comment) => comment['id'] == commentId);
-          if (commentIndex != -1) {
-            blogDetail!['comments'][commentIndex]['description'] =
-                newCommentText;
-          }
-        });
-      } else {
-        final errorData = jsonDecode(response.body);
-        // Show error message with red background
-        _showMessage(errorData['errors'], backgroundColor: Colors.red);
-      }
-    } catch (e) {
-      print('Error occurred while updating comment: $e');
+  void _addComment() {
+    final commentText = _commentController.text;
+    if (commentText.isNotEmpty) {
+      _postComment(commentText);
+      _commentController.clear();
     }
   }
 
-// Function to show message
-  void _showMessage(String message, {Color? backgroundColor}) {
+  void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         duration: Duration(seconds: 3),
-        backgroundColor: backgroundColor ?? Colors.green,
       ),
     );
   }
@@ -231,22 +190,6 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Icon(Icons.thumb_up, color: Colors.black54, size: 24),
-                      SizedBox(width: 5),
-                      Text(
-                        'Likes: ${blogDetail!['likeCount']}',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
                   Text(
                     'Comments:',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -264,6 +207,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                           itemCount: blogDetail!['comments'].length,
                           itemBuilder: (context, index) {
                             final comment = blogDetail!['comments'][index];
+                            final isAuthor = comment['authorName'] ==
+                                storedName; // Check if the user is the author
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Card(
@@ -303,27 +248,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                           ],
                                         ),
                                       ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.delete,
-                                                color: Colors.red),
-                                            onPressed: () async {
-                                              await _deleteComment(
-                                                  comment['id']);
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.edit,
-                                                color: Colors.blue),
-                                            onPressed: () {
-                                              // Implement update comment functionality
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                      if (isAuthor) // Show buttons if the user is the author
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.red),
+                                              onPressed: () async {
+                                                await _deleteComment(
+                                                    comment['id']);
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.edit,
+                                                  color: Colors.blue),
+                                              onPressed: () {
+                                                // Implement the update comment functionality here
+                                                // You may want to show a dialog to get the new comment text
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                     ],
                                   ),
                                 ),

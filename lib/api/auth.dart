@@ -14,7 +14,8 @@ const updateProfileEndpoint =
 const getAchievementEndpoint =
     'http://167.71.220.5:8080/mentor/achievement/get';
 
-const deleteAchievementEndpoint = 'http://167.71.220.5:8080/mentor/achievement/delete/';
+const deleteAchievementEndpoint =
+    'http://167.71.220.5:8080/mentor/achievement/delete/';
 
 //profile/update-profile
 
@@ -77,7 +78,10 @@ class AuthApi {
     );
     log(jsonEncode(response.body.toString()));
     if (response.statusCode == 200) {
-      return AccountProfile.fromJson(jsonDecode(response.body)['data']);
+      var data = jsonDecode(response.body)['data'];
+      String name = data['name'];
+      await _storage.write(key: 'name', value: name);
+      return AccountProfile.fromJson(data);
     }
     throw Exception(json.decode(response.body)['message']);
   }
@@ -130,18 +134,19 @@ class AuthApi {
     throw Exception(json.decode(response.body)['message']);
   }
 
-  static Future<bool> deleteAchievement(
-      {required String achievementId,
-      }) async {
+  static Future<bool> deleteAchievement({
+    required String achievementId,
+  }) async {
     var url = Uri.parse(deleteAchievementEndpoint + achievementId);
     String? accessToken = await _storage.read(key: 'accessToken');
-    final response = await http.delete(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Accept': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $accessToken'
-        },
-        );
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
     log(jsonEncode(response.body.toString()));
     if (response.statusCode == 200) {
       return true;

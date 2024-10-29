@@ -14,7 +14,7 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  double balance = 0.0;
+  double total = 0.0;
   bool isLoading = true;
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -38,9 +38,9 @@ class _WalletScreenState extends State<WalletScreen> {
 
       if (response.statusCode == 200) {
         // Parse the JSON response
-        final data = json.decode(response.body);
+        final data = json.decode(response.body)['data'];
         setState(() {
-          balance = data['balance'] ?? 0.0; // Update balance
+          total = data['total'] ?? 0.0; // Update balance
           isLoading = false; // Loading complete
         });
       } else {
@@ -122,7 +122,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              '${balance.toStringAsFixed(2)} VNĐ', // Display balance with 2 decimal points
+                              '${total.toStringAsFixed(2)} VNĐ', // Display balance with 2 decimal points
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 36,
