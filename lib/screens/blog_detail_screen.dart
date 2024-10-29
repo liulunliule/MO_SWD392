@@ -232,6 +232,39 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     );
   }
 
+  void _showDeleteConfirmationDialog(int commentId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirm Deletion'),
+        content: Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text('Cancel'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _deleteComment(commentId);
+              Navigator.of(context).pop(); // Close the dialog after deletion
+            },
+            child: Text('Delete'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -364,7 +397,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                               icon: Icon(Icons.delete,
                                                   color: Colors.red),
                                               onPressed: () async {
-                                                await _deleteComment(
+                                                _showDeleteConfirmationDialog(
                                                     comment['id']);
                                               },
                                             ),
