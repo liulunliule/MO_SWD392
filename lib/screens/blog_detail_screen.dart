@@ -18,18 +18,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   Map<String, dynamic>? blogDetail;
   bool isLoading = true;
   final TextEditingController _commentController = TextEditingController();
-  String? storedName; // Variable to hold the stored name
+  String? storedName;
 
   @override
   void initState() {
     super.initState();
     fetchBlogDetail();
-    _getStoredName(); // Retrieve stored name
+    _getStoredName();
   }
 
   Future<void> _getStoredName() async {
-    storedName = await _storage.read(key: 'name') ??
-        'Anonymous'; // Fallback to 'Anonymous' if not found
+    storedName = await _storage.read(key: 'name') ?? 'Anonymous';
   }
 
   Future<void> fetchBlogDetail() async {
@@ -49,6 +48,42 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       print('Error occurred: $e');
     }
   }
+
+  // Future<void> _postComment(String commentText) async {
+  //   String? accessToken = await _storage.read(key: 'accessToken');
+  //   if (accessToken == null) {
+  //     print('Access token not found');
+  //     return;
+  //   }
+
+  //   final url = "http://167.71.220.5:8080/comment/create";
+  //   final body = jsonEncode({"blogId": widget.blogId, "comment": commentText});
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $accessToken',
+  //       },
+  //       body: body,
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final newComment = {
+  //         'authorName': storedName,
+  //         'description': commentText,
+  //       };
+  //       setState(() {
+  //         blogDetail!['comments'].add(newComment);
+  //       });
+  //     } else {
+  //       print('Failed to post comment: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error occurred while posting comment: $e');
+  //   }
+  // }
 
   Future<void> _postComment(String commentText) async {
     String? accessToken = await _storage.read(key: 'accessToken');
@@ -71,13 +106,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       );
 
       if (response.statusCode == 200) {
-        final newComment = {
-          'authorName': storedName, // Use stored name
-          'description': commentText,
-        };
-        setState(() {
-          blogDetail!['comments'].add(newComment);
-        });
+        // Gọi lại fetchBlogDetail để lấy dữ liệu mới
+        await fetchBlogDetail();
+        // _showMessage('Comment added successfully!');
       } else {
         print('Failed to post comment: ${response.statusCode}');
       }
@@ -117,12 +148,88 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     }
   }
 
+  Future<void> _editComment(int commentId, String newCommentText) async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      print('Access token not found');
+      return;
+    }
+
+    final url = "http://167.71.220.5:8080/comment/update/$commentId";
+    final body = jsonEncode({"comment": newCommentText});
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final commentIndex = blogDetail!['comments']
+              .indexWhere((comment) => comment['id'] == commentId);
+          if (commentIndex != -1) {
+            blogDetail!['comments'][commentIndex]['description'] =
+                newCommentText;
+          }
+        });
+        _showMessage('Comment updated successfully!');
+      } else {
+        print('Failed to update comment: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred while updating comment: $e');
+    }
+  }
+
   void _addComment() {
     final commentText = _commentController.text;
     if (commentText.isNotEmpty) {
       _postComment(commentText);
       _commentController.clear();
     }
+  }
+
+  void _showEditDialog(int commentId, String currentText) {
+    TextEditingController editController =
+        TextEditingController(text: currentText);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Comment'),
+        content: TextField(
+          controller: editController,
+          decoration: InputDecoration(hintText: 'Edit your comment'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _editComment(commentId, editController.text);
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showMessage(String message) {
@@ -207,8 +314,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                           itemCount: blogDetail!['comments'].length,
                           itemBuilder: (context, index) {
                             final comment = blogDetail!['comments'][index];
-                            final isAuthor = comment['authorName'] ==
-                                storedName; // Check if the user is the author
+                            final isAuthor =
+                                comment['authorName'] == storedName;
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Card(
@@ -248,7 +355,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                           ],
                                         ),
                                       ),
-                                      if (isAuthor) // Show buttons if the user is the author
+                                      if (isAuthor)
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -265,8 +372,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                               icon: Icon(Icons.edit,
                                                   color: Colors.blue),
                                               onPressed: () {
-                                                // Implement the update comment functionality here
-                                                // You may want to show a dialog to get the new comment text
+                                                _showEditDialog(comment['id'],
+                                                    comment['description']);
                                               },
                                             ),
                                           ],

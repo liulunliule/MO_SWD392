@@ -42,6 +42,7 @@ class AuthApi {
       await _storage.write(key: 'accessToken', value: accessToken);
       await _storage.write(key: 'refreshToken', value: refreshToken);
       await _storage.write(key: 'role', value: role);
+      await getProfile();
 
       return true;
     }

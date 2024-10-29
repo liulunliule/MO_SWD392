@@ -30,6 +30,7 @@ class _HeaderState extends State<Header> {
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'role');
+    await _storage.delete(key: 'name');
     _checkLoginStatus();
   }
 
