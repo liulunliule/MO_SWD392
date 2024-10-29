@@ -11,20 +11,20 @@ class FirebaseApi {
 
   // FCM
   static Future<void> init() async {
-    // Yêu cầu quyền iOS
+    //iOS
     await _firebaseMessaging.requestPermission();
 
-    // Lấy token FCM
+    //token FCM
     String? token = await _firebaseMessaging.getToken();
     print("FCM Token: $token");
 
-    // Xử lý khi nhận được tin nhắn khi app đang mở
+    //nhận được tin nhắn khi app đang mở
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print(
           "Received message: ${message.notification?.title} - ${message.notification?.body}");
     });
 
-    // Xử lý khi người dùng nhấn vào thông báo và mở ứng dụng
+    //nhấn vào thông báo và mở ứng dụng
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("Message clicked!");
       _handleMessageNavigation(message);
@@ -38,7 +38,7 @@ class FirebaseApi {
     }
   }
 
-  // Hàm điều hướng đến trang '/notificationsFirebase'
+  // '/notificationsFirebase'
   static void _handleMessageNavigation(RemoteMessage message) {
     navigatorKey.currentState?.pushNamed('/notificationsFirebase');
   }
