@@ -140,22 +140,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               UtilsReponsive.sizedBoxHeight(context, value: 20),
                               '${account.role}' == 'MENTOR'
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                            context, '/achievement');
-                                      },
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Icon(Icons.archive),
-                                          TextConstant.subTile3(context,
-                                              text: 'Achievement')
-                                        ],
-                                      ),
+                                  ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                                context, '/specialization');
+                                          },
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Icon(Icons.archive),
+                                              TextConstant.subTile3(context,
+                                                  text: 'Specialization')
+                                            ],
+                                          ),
+                                        ),
+                                        UtilsReponsive.sizedBoxWidth(context),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                                context, '/achievement');
+                                          },
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Icon(Icons.archive),
+                                              TextConstant.subTile3(context,
+                                                  text: 'Achievement')
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     )
                                   : SizedBox.shrink(),
                               Row(
@@ -262,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Cancel',
+            'Huỷ bỏ',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,
@@ -293,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Edit Profile',
+            'Chỉnh sửa',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,
@@ -326,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Update',
+            'Cập nhật',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,

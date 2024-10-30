@@ -14,10 +14,14 @@ const updateProfileEndpoint =
 const getAchievementEndpoint =
     'http://167.71.220.5:8080/mentor/achievement/get';
 
+const getSpecializationEndpoint =
+    'http://167.71.220.5:8080/mentor/specialization/get';
+
 const deleteAchievementEndpoint =
     'http://167.71.220.5:8080/mentor/achievement/delete/';
 
-//profile/update-profile
+const updateSpecializationEndpoint =
+    'http://167.71.220.5:8080/mentor/specialization/update';
 
 class AuthApi {
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -153,5 +157,46 @@ class AuthApi {
       return true;
     }
     throw Exception(json.decode(response.body)['message']);
+  }
+
+  static Future<List<String>> getSpecialization() async {
+    var url = Uri.parse(getSpecializationEndpoint);
+    String? accessToken = await _storage.read(key: 'accessToken');
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
+    log(jsonEncode(response.body.toString()));
+    if (response.statusCode == 200) {
+      List<String> listData = [];
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body)["data"];
+        listData = data.map((item) => item.toString()).toList();
+      }
+      return listData;
+    }
+    throw Exception(json.decode(response.body)['message']);
+  }
+
+  static Future updateSpecialization({required List<String> listData}) async {
+    var url = Uri.parse(updateSpecializationEndpoint);
+    String? accessToken = await _storage.read(key: 'accessToken');
+    final response = await http.put(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken'
+        },
+        body: jsonEncode({"enumList": listData}));
+    log(jsonEncode(response.body.toString()));
+
+    // if (response.statusCode == 200) {
+    //   return AccountProfile.fromJson(jsonDecode(response.body)['data']);
+    // }
+    // throw Exception(json.decode(response.body)['message']);
   }
 }

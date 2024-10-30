@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mo_swd392/api/auth.dart';
 import 'package:mo_swd392/layouts/second_layout.dart';
 import 'package:mo_swd392/model/achievement.dart';
+import 'package:mo_swd392/resource/color_const.dart';
 import 'package:mo_swd392/resource/reponsive_utils.dart';
 import 'package:mo_swd392/resource/text_style.dart';
 
@@ -103,63 +104,85 @@ class _CardAchieveState extends State<CardAchieve> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextConstant.subTile2(context, text: data.achievementName ?? ''),
-              TextConstant.subTile3(context,
-                  size: 10,
-                  fontWeight: FontWeight.w500,
-                  text: data.achievementDescription ?? ''),
-              TextConstant.subTile3(context,
-                  size: 10,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w500,
-                  text: data.achievementLink ?? ''),
-            ],
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.all(5),
+      decoration: BoxDecoration(
+          border: Border.all(color: ColorsManager.primary),
+          borderRadius:
+              BorderRadius.circular(UtilsReponsive.height(10, context)),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: ColorsManager.primary,
+              spreadRadius: 2,
+              blurRadius: 0.2,
+              offset: Offset(3, 4),
+            ),
+          ]),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextConstant.subTile2(
+                  context,
+                  text: data.achievementName ?? '',
+                ),
+                UtilsReponsive.sizedBoxHeight(context),
+                TextConstant.subTile3(context,
+                    size: 10,
+                    fontWeight: FontWeight.w500,
+                    text: data.achievementDescription ?? ''),
+                TextConstant.subTile3(context,
+                    size: 10,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                    text: data.achievementLink ?? ''),
+              ],
+            ),
           ),
-        ),
-        isLoading?CupertinoActivityIndicator():
-        isDelete
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        removeData();
-                        isDelete = false;
-                      });
-                    },
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.red,
-                    ),
-                  ),
-                  GestureDetector(
+          isLoading
+              ? CupertinoActivityIndicator()
+              : isDelete
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              removeData();
+                              isDelete = false;
+                            });
+                          },
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.red,
+                          ),
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isDelete = false;
+                              });
+                            },
+                            child: Icon(Icons.close))
+                      ],
+                    )
+                  : GestureDetector(
                       onTap: () {
                         setState(() {
-                          isDelete = false;
+                          isDelete = true;
                         });
                       },
-                      child: Icon(Icons.close))
-                ],
-              )
-            : GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isDelete = true;
-                  });
-                },
-                child: Icon(
-                  Icons.remove_circle,
-                  color: Colors.red,
-                ),
-              ),
-      ],
+                      child: Icon(
+                        Icons.remove_circle,
+                        color: Colors.red,
+                      ),
+                    ),
+        ],
+      ),
     );
   }
 }
