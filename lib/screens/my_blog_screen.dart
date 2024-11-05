@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../../api/api_my_blog.dart';
 import '../layouts/second_layout.dart';
 
 class MyBlogScreen extends StatefulWidget {
@@ -12,7 +11,7 @@ class MyBlogScreen extends StatefulWidget {
 class _MyBlogScreenState extends State<MyBlogScreen> {
   List<Map<String, dynamic>> blogs = [];
   bool isLoadingBlogs = true;
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final ApiMyBlog _apiMyBlog = ApiMyBlog();
 
   @override
   void initState() {
@@ -20,64 +19,22 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
     fetchBlogs();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    fetchBlogs();
-  }
-
   Future<void> fetchBlogs() async {
-    final url = "http://167.71.220.5:8080/blog/view/by-account";
-    try {
-      String? accessToken = await _storage.read(key: 'accessToken');
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body)['data'];
-        setState(() {
-          blogs = List<Map<String, dynamic>>.from(data);
-          isLoadingBlogs = false;
-        });
-      } else {
-        print('Failed to load blogs: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
+    setState(() => isLoadingBlogs = true);
+    blogs = await _apiMyBlog.fetchMyBlogs();
+    setState(() => isLoadingBlogs = false);
   }
 
   Future<void> deleteBlog(String blogId) async {
-    final url = "http://167.71.220.5:8080/blog/delete/$blogId";
-    try {
-      String? accessToken = await _storage.read(key: 'accessToken');
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 202 || response.statusCode == 200) {
-        fetchBlogs();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Blog deleted successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed to delete blog: ${response.statusCode}')),
-        );
-      }
-    } catch (e) {
-      print('Error occurred while deleting blog: $e');
+    final success = await _apiMyBlog.deleteBlog(blogId);
+    if (success) {
+      fetchBlogs();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred while deleting blog')),
+        SnackBar(content: Text('Blog deleted successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete blog')),
       );
     }
   }
@@ -160,7 +117,6 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 5),
-                                          // Display category below the title
                                           Text(
                                             '#${blog['category']}',
                                             style: TextStyle(
@@ -204,8 +160,11 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                                                           context,
                                                           '/updateBlog',
                                                           arguments: blog['id'],
-                                                        );
-                                                        fetchBlogs();
+                                                        ).then((result) {
+                                                          if (result == true) {
+                                                            fetchBlogs();
+                                                          }
+                                                        });
                                                       },
                                                       child: Text(
                                                         'Update',

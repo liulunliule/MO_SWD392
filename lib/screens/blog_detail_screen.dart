@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../layouts/second_layout.dart';
+import '../../../api/api_blog.dart';
 
 class BlogDetailScreen extends StatefulWidget {
   final int blogId;
@@ -32,158 +31,25 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   }
 
   Future<void> fetchBlogDetail() async {
-    final url = "http://167.71.220.5:8080/blog/view/${widget.blogId}";
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body)['data'];
-        setState(() {
-          blogDetail = data;
-          isLoading = false;
-        });
-      } else {
-        print('Failed to load blog detail: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
+    blogDetail = await ApiBlog.fetchBlogDetail(widget.blogId);
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  // Future<void> _postComment(String commentText) async {
-  //   String? accessToken = await _storage.read(key: 'accessToken');
-  //   if (accessToken == null) {
-  //     print('Access token not found');
-  //     return;
-  //   }
-
-  //   final url = "http://167.71.220.5:8080/comment/create";
-  //   final body = jsonEncode({"blogId": widget.blogId, "comment": commentText});
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': 'Bearer $accessToken',
-  //       },
-  //       body: body,
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final newComment = {
-  //         'authorName': storedName,
-  //         'description': commentText,
-  //       };
-  //       setState(() {
-  //         blogDetail!['comments'].add(newComment);
-  //       });
-  //     } else {
-  //       print('Failed to post comment: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error occurred while posting comment: $e');
-  //   }
-  // }
-
   Future<void> _postComment(String commentText) async {
-    String? accessToken = await _storage.read(key: 'accessToken');
-    if (accessToken == null) {
-      print('Access token not found');
-      return;
-    }
-
-    final url = "http://167.71.220.5:8080/comment/create";
-    final body = jsonEncode({"blogId": widget.blogId, "comment": commentText});
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        // Gọi lại fetchBlogDetail để lấy dữ liệu mới
-        await fetchBlogDetail();
-        // _showMessage('Comment added successfully!');
-      } else {
-        print('Failed to post comment: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred while posting comment: $e');
-    }
+    await ApiBlog.postComment(widget.blogId, commentText);
+    fetchBlogDetail(); // Refresh comments after posting
   }
 
   Future<void> _deleteComment(int commentId) async {
-    String? accessToken = await _storage.read(key: 'accessToken');
-    if (accessToken == null) {
-      print('Access token not found');
-      return;
-    }
-
-    final url = "http://167.71.220.5:8080/comment/delete/$commentId";
-
-    try {
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          blogDetail!['comments']
-              .removeWhere((comment) => comment['id'] == commentId);
-        });
-        _showMessage('Comment deleted successfully!');
-      } else {
-        print('Failed to delete comment: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred while deleting comment: $e');
-    }
+    await ApiBlog.deleteComment(commentId);
+    fetchBlogDetail(); // Refresh comments after deletion
   }
 
   Future<void> _editComment(int commentId, String newCommentText) async {
-    String? accessToken = await _storage.read(key: 'accessToken');
-    if (accessToken == null) {
-      print('Access token not found');
-      return;
-    }
-
-    final url = "http://167.71.220.5:8080/comment/update/$commentId";
-    final body = jsonEncode({"comment": newCommentText});
-
-    try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          final commentIndex = blogDetail!['comments']
-              .indexWhere((comment) => comment['id'] == commentId);
-          if (commentIndex != -1) {
-            blogDetail!['comments'][commentIndex]['description'] =
-                newCommentText;
-          }
-        });
-        _showMessage('Comment updated successfully!');
-      } else {
-        print('Failed to update comment: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred while updating comment: $e');
-    }
+    await ApiBlog.editComment(commentId, newCommentText);
+    fetchBlogDetail(); // Refresh comments after editing
   }
 
   void _addComment() {

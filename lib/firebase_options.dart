@@ -2,7 +2,7 @@
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+    show defaultTargetPlatform, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -16,18 +16,12 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
-    if (kIsWeb) {
-      return web;
-    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
         return ios;
-      case TargetPlatform.macOS:
-        return macos;
-      case TargetPlatform.windows:
-        return windows;
+
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -39,15 +33,6 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDzC2_yOGOC3_Vgu85ung81eII7xDFCoh8',
-    appId: '1:489219364726:web:978161f46de964bb00cc57',
-    messagingSenderId: '489219364726',
-    projectId: 'noti-swd392',
-    authDomain: 'noti-swd392.firebaseapp.com',
-    storageBucket: 'noti-swd392.appspot.com',
-  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC6NlsSlo9F2uS1ts6Cc5gYI8pdBl_tOEA',
@@ -63,25 +48,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '853981095655',
     projectId: 'mentor-booking-3d46a',
     storageBucket: 'mentor-booking-3d46a.appspot.com',
-    iosClientId: '853981095655-01492c1atp0m6c06uouovbid1gsldudj.apps.googleusercontent.com',
+    iosClientId:
+        '853981095655-01492c1atp0m6c06uouovbid1gsldudj.apps.googleusercontent.com',
     iosBundleId: 'com.example.moSwd392',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAvF71EFakvpmLYsjNgTqUunH0ukXPOxqA',
-    appId: '1:489219364726:ios:c6296c2bfac9377200cc57',
-    messagingSenderId: '489219364726',
-    projectId: 'noti-swd392',
-    storageBucket: 'noti-swd392.appspot.com',
-    iosBundleId: 'com.example.moSwd392',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDzC2_yOGOC3_Vgu85ung81eII7xDFCoh8',
-    appId: '1:489219364726:web:ebe2ac3357d5127200cc57',
-    messagingSenderId: '489219364726',
-    projectId: 'noti-swd392',
-    authDomain: 'noti-swd392.firebaseapp.com',
-    storageBucket: 'noti-swd392.appspot.com',
   );
 }

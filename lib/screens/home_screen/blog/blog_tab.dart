@@ -18,7 +18,7 @@ class _BlogTabState extends State<BlogTab> {
 
   Future<void> loadBlogs() async {
     setState(() => isLoadingBlogs = true);
-    blogs = await fetchBlogs();
+    blogs = await ApiBlog.fetchBlogs(); // Updated to use ApiBlog
     setState(() => isLoadingBlogs = false);
   }
 

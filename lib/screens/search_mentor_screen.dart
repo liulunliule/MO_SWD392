@@ -416,8 +416,6 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
               ),
             ),
           ),
-          // ... Các phần khác không thay đổi
-
           Positioned(
             top: 80,
             left: MediaQuery.of(context).size.width * 0.125,
@@ -441,11 +439,9 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                           var mentor = mentors[index];
                           return GestureDetector(
                             onTap: () {
-                              // Chuyển hướng đến MentorProfileScreen với accountId
                               Navigator.of(context).pushNamed(
                                 '/mentorProfile',
-                                arguments: mentor[
-                                    'accountId'], // Giả sử 'accountId' là key chứa id của mentor
+                                arguments: mentor['accountId'],
                               );
                             },
                             child: Card(
@@ -501,17 +497,15 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                         children: [
                                           // Specializations
                                           SizedBox(height: 10),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${mentor['specializationList'].join(' | ')}',
-                                                style: TextStyle(
-                                                    fontSize: 20,
-                                                    color: Colors.grey),
-                                              ),
-                                            ],
+                                          Text(
+                                            mentor['specializationList']
+                                                .join('\n'),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.grey),
+                                            softWrap: true,
                                           ),
-                                          // accountName
+                                          // Account Name
                                           Text(
                                             mentor['accountName'],
                                             style: TextStyle(
@@ -520,7 +514,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                               color: Colors.black87,
                                             ),
                                           ),
-                                          // accountEmail
+                                          // Account Email
                                           SizedBox(height: 5),
                                           Row(
                                             children: [
@@ -536,7 +530,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                               ),
                                             ],
                                           ),
-                                          // pricePerHour
+                                          // Price Per Hour
                                           SizedBox(height: 10),
                                           Row(
                                             children: [
