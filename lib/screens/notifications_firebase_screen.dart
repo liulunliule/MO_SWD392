@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Import FlutterSecureStorage
-import '../layouts/second_layout.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationFirebaseScreen extends StatefulWidget {
   @override
@@ -12,82 +9,112 @@ class NotificationFirebaseScreen extends StatefulWidget {
 
 class _NotificationFirebaseScreenState
     extends State<NotificationFirebaseScreen> {
-  final FlutterSecureStorage _storage =
-      FlutterSecureStorage(); // Khởi tạo FlutterSecureStorage
-  List<dynamic> notifications = [];
-  bool isLoading = true;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  List<RemoteMessage> _messages = [];
 
   @override
   void initState() {
     super.initState();
-    fetchNotifications();
+    _initializeFCM();
   }
 
-  Future<void> fetchNotifications() async {
-    try {
-      // Lấy accessToken từ storage
-      String? accessToken = await _storage.read(key: 'accessToken');
-      if (accessToken != null) {
-        final response = await http.get(
-          Uri.parse('http://167.71.220.5:8080/notification/all'),
-          headers: {
-            'Authorization': 'Bearer $accessToken',
-          },
-        );
-
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          setState(() {
-            notifications = data['data'];
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          print('Failed to load notifications');
-        }
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        print('Access token not found');
-      }
-    } catch (e) {
+  Future<void> _initializeFCM() async {
+    // Đăng ký nhận thông báo
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       setState(() {
-        isLoading = false;
+        _messages.add(message);
       });
-      print('Error: $e');
+      print('Message received: ${message.notification?.title}');
+    });
+
+    // Xử lý thông báo khi ứng dụng đang chạy ở nền
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new message opened the app: ${message.messageId}');
+    });
+
+    // Lấy thông báo từ Firebase khi ứng dụng khởi động
+    RemoteMessage? initialMessage =
+        await _firebaseMessaging.getInitialMessage();
+    if (initialMessage != null) {
+      setState(() {
+        _messages.add(initialMessage);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SecondLayout(
-      title: 'Notifications Firebase',
-      currentPage: 'notificationsFirebase',
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : notifications.isEmpty
-              ? Center(child: Text('No notifications available'))
-              : ListView.builder(
-                  padding: EdgeInsets.all(16.0),
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final notification = notifications[index];
-                    return buildNotificationItem(
-                      context,
-                      message: notification['message'],
-                      status: notification['status'],
-                      time: notification['date'],
-                    );
-                  },
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80.0),
+        child: Stack(
+          children: [
+            // Vòng tròn nền trên cùng và dưới
+            Positioned(
+              top: -110,
+              left: -50,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.green[700],
+                  shape: BoxShape.circle,
                 ),
+              ),
+            ),
+            Positioned(
+              bottom: -65,
+              right: -25,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.green[700],
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            // Nội dung AppBar
+            AppBar(
+              title: Text(
+                'Firebase Notifications',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: const Color.fromARGB(189, 15, 137, 19),
+              elevation: 0,
+              foregroundColor: Colors.white,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: _messages.isEmpty
+          ? Center(child: Text('No notifications available'))
+          : ListView.builder(
+              padding: EdgeInsets.all(16.0),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return buildNotificationItem(
+                  title: message.notification?.title ?? 'No Title',
+                  body: message.notification?.body ?? 'No Body',
+                  time: message.sentTime?.toString() ?? '',
+                );
+              },
+            ),
     );
   }
 
-  Widget buildNotificationItem(BuildContext context,
-      {required String message, required String status, required String time}) {
+  Widget buildNotificationItem({
+    required String title,
+    required String body,
+    required String time,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -96,8 +123,7 @@ class _NotificationFirebaseScreenState
           CircleAvatar(
             radius: 24,
             backgroundColor: Colors.grey[300],
-            child: Icon(Icons.person,
-                color: Colors.white), // Placeholder for profile icon
+            child: Icon(Icons.notifications, color: Colors.white),
           ),
           SizedBox(width: 16),
           Expanded(
@@ -105,46 +131,24 @@ class _NotificationFirebaseScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  message,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  title,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  status,
-                  style: TextStyle(color: getStatusColor(status)),
+                  body,
+                  style: TextStyle(color: Colors.grey[700]),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
           ),
-          Text(
-            formatTime(time),
-            style: TextStyle(color: Colors.grey),
-          ),
         ],
       ),
     );
-  }
-
-  Color getStatusColor(String status) {
-    switch (status) {
-      case 'PROCESSING':
-        return Colors.orange;
-      case 'SUCCESSFUL':
-        return Colors.green;
-      case 'PENDING':
-        return Colors.blue;
-      case 'DECLINED':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String formatTime(String time) {
-    final dateTime = DateTime.parse(time);
-    return '${dateTime.hour}:${dateTime.minute} ${dateTime.year}-${dateTime.month}-${dateTime.day}';
   }
 }

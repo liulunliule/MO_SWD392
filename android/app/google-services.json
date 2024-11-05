@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "489219364726",
-    "project_id": "noti-swd392",
-    "storage_bucket": "noti-swd392.appspot.com"
+    "project_number": "853981095655",
+    "project_id": "mentor-booking-3d46a",
+    "storage_bucket": "mentor-booking-3d46a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:489219364726:android:4972820945c244d500cc57",
+        "mobilesdk_app_id": "1:853981095655:android:b6bfa8eb5a613fc741e442",
         "android_client_info": {
           "package_name": "com.example.mo_swd392"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "853981095655-485ccp78tkts2e3oejkt6vvj8tgbuvra.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBPPry9Wtt4PPsoMTjFN614Y9m68LffiPY"
+          "current_key": "AIzaSyC6NlsSlo9F2uS1ts6Cc5gYI8pdBl_tOEA"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853981095655-485ccp78tkts2e3oejkt6vvj8tgbuvra.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
