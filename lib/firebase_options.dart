@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBPPry9Wtt4PPsoMTjFN614Y9m68LffiPY',
-    appId: '1:489219364726:android:4972820945c244d500cc57',
-    messagingSenderId: '489219364726',
-    projectId: 'noti-swd392',
-    storageBucket: 'noti-swd392.appspot.com',
+    apiKey: 'AIzaSyC6NlsSlo9F2uS1ts6Cc5gYI8pdBl_tOEA',
+    appId: '1:853981095655:android:b6bfa8eb5a613fc741e442',
+    messagingSenderId: '853981095655',
+    projectId: 'mentor-booking-3d46a',
+    storageBucket: 'mentor-booking-3d46a.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAvF71EFakvpmLYsjNgTqUunH0ukXPOxqA',
-    appId: '1:489219364726:ios:c6296c2bfac9377200cc57',
-    messagingSenderId: '489219364726',
-    projectId: 'noti-swd392',
-    storageBucket: 'noti-swd392.appspot.com',
+    apiKey: 'AIzaSyDXjGFVhl23TiMMG1dg7-xIr3B4uGbpX5c',
+    appId: '1:853981095655:ios:a12eb141dca9be4d41e442',
+    messagingSenderId: '853981095655',
+    projectId: 'mentor-booking-3d46a',
+    storageBucket: 'mentor-booking-3d46a.appspot.com',
+    iosClientId: '853981095655-01492c1atp0m6c06uouovbid1gsldudj.apps.googleusercontent.com',
     iosBundleId: 'com.example.moSwd392',
   );
 
