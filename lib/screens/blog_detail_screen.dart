@@ -18,11 +18,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   Map<String, dynamic>? blogDetail;
   bool isLoading = true;
   final TextEditingController _commentController = TextEditingController();
+  String? storedName;
 
   @override
   void initState() {
     super.initState();
     fetchBlogDetail();
+    _getStoredName();
+  }
+
+  Future<void> _getStoredName() async {
+    storedName = await _storage.read(key: 'name') ?? 'Anonymous';
   }
 
   Future<void> fetchBlogDetail() async {
@@ -42,6 +48,42 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       print('Error occurred: $e');
     }
   }
+
+  // Future<void> _postComment(String commentText) async {
+  //   String? accessToken = await _storage.read(key: 'accessToken');
+  //   if (accessToken == null) {
+  //     print('Access token not found');
+  //     return;
+  //   }
+
+  //   final url = "http://167.71.220.5:8080/comment/create";
+  //   final body = jsonEncode({"blogId": widget.blogId, "comment": commentText});
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $accessToken',
+  //       },
+  //       body: body,
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final newComment = {
+  //         'authorName': storedName,
+  //         'description': commentText,
+  //       };
+  //       setState(() {
+  //         blogDetail!['comments'].add(newComment);
+  //       });
+  //     } else {
+  //       print('Failed to post comment: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error occurred while posting comment: $e');
+  //   }
+  // }
 
   Future<void> _postComment(String commentText) async {
     String? accessToken = await _storage.read(key: 'accessToken');
@@ -64,18 +106,83 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       );
 
       if (response.statusCode == 200) {
-        final newComment = {
-          'authorName': 'You',
-          'description': commentText,
-        };
-        setState(() {
-          blogDetail!['comments'].add(newComment);
-        });
+        // Gọi lại fetchBlogDetail để lấy dữ liệu mới
+        await fetchBlogDetail();
+        // _showMessage('Comment added successfully!');
       } else {
         print('Failed to post comment: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred while posting comment: $e');
+    }
+  }
+
+  Future<void> _deleteComment(int commentId) async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      print('Access token not found');
+      return;
+    }
+
+    final url = "http://167.71.220.5:8080/comment/delete/$commentId";
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          blogDetail!['comments']
+              .removeWhere((comment) => comment['id'] == commentId);
+        });
+        _showMessage('Comment deleted successfully!');
+      } else {
+        print('Failed to delete comment: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred while deleting comment: $e');
+    }
+  }
+
+  Future<void> _editComment(int commentId, String newCommentText) async {
+    String? accessToken = await _storage.read(key: 'accessToken');
+    if (accessToken == null) {
+      print('Access token not found');
+      return;
+    }
+
+    final url = "http://167.71.220.5:8080/comment/update/$commentId";
+    final body = jsonEncode({"comment": newCommentText});
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final commentIndex = blogDetail!['comments']
+              .indexWhere((comment) => comment['id'] == commentId);
+          if (commentIndex != -1) {
+            blogDetail!['comments'][commentIndex]['description'] =
+                newCommentText;
+          }
+        });
+        _showMessage('Comment updated successfully!');
+      } else {
+        print('Failed to update comment: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred while updating comment: $e');
     }
   }
 
@@ -85,6 +192,86 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       _postComment(commentText);
       _commentController.clear();
     }
+  }
+
+  void _showEditDialog(int commentId, String currentText) {
+    TextEditingController editController =
+        TextEditingController(text: currentText);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Comment'),
+        content: TextField(
+          controller: editController,
+          decoration: InputDecoration(hintText: 'Edit your comment'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _editComment(commentId, editController.text);
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(int commentId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirm Deletion'),
+        content: Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text('Cancel'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _deleteComment(commentId);
+              Navigator.of(context).pop(); // Close the dialog after deletion
+            },
+            child: Text('Delete'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -143,22 +330,6 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Icon(Icons.thumb_up, color: Colors.black54, size: 24),
-                      SizedBox(width: 5),
-                      Text(
-                        'Likes: ${blogDetail!['likeCount']}',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
                   Text(
                     'Comments:',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -176,6 +347,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                           itemCount: blogDetail!['comments'].length,
                           itemBuilder: (context, index) {
                             final comment = blogDetail!['comments'][index];
+                            final isAuthor =
+                                comment['authorName'] == storedName;
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Card(
@@ -215,23 +388,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                                           ],
                                         ),
                                       ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                                Icons.thumb_up_alt_outlined,
-                                                color: Colors.grey),
-                                            onPressed: () {},
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.reply,
-                                                color: Colors.grey),
-                                            onPressed: () {},
-                                          ),
-                                        ],
-                                      ),
+                                      if (isAuthor)
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.red),
+                                              onPressed: () async {
+                                                _showDeleteConfirmationDialog(
+                                                    comment['id']);
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.edit,
+                                                  color: Colors.blue),
+                                              onPressed: () {
+                                                _showEditDialog(comment['id'],
+                                                    comment['description']);
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                     ],
                                   ),
                                 ),

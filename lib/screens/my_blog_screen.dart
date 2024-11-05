@@ -279,7 +279,7 @@ class _MyBlogScreenState extends State<MyBlogScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 181, 237, 61),
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(

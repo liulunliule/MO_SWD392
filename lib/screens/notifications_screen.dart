@@ -29,6 +29,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
     fetchNotifications();
   }
 
+  void _showMessage(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 3),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> fetchNotifications() async {
     try {
       String? accessToken = await _storage.read(key: 'accessToken');
@@ -66,10 +75,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  Future<void> approveNotification(int id) async {
+  Future<void> approveNotification(int bookingId) async {
     try {
       String? accessToken = await _storage.read(key: 'accessToken');
-      final url = 'http://167.71.220.5:8080/mentor/booking/approve/$id';
+      final url = 'http://167.71.220.5:8080/mentor/booking/approve/$bookingId';
       final response = await http.post(
         Uri.parse(url),
         headers: {
@@ -77,20 +86,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
         },
       );
 
+      final responseData = json.decode(response.body);
+
       if (response.statusCode == 200) {
         print("Notification approved successfully.");
         fetchNotifications(); // Refresh notifications after approval
+        _showMessage(responseData['message']); // Show success message
       } else {
-        print("Failed to approve notification: ${response.statusCode}");
+        _showMessage(responseData['message']); // Show error message
       }
     } catch (e) {
       print("Error approving notification: $e");
+      _showMessage("An error occurred while approving the notification.");
     }
   }
 
-  void rejectNotification(int index) {
-    // Implement your rejection logic here
-    print("Rejected notification at index: $index");
+  Future<void> rejectNotification(int bookingId) async {
+    try {
+      String? accessToken = await _storage.read(key: 'accessToken');
+      final url = 'http://167.71.220.5:8080/mentor/booking/reject/$bookingId';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        print("Notification rejected successfully.");
+        fetchNotifications(); // Refresh notifications after rejection
+        _showMessage(responseData['message']); // Show success message
+      } else {
+        _showMessage(responseData['message']); // Show error message
+      }
+    } catch (e) {
+      print("Error rejecting notification: $e");
+      _showMessage("An error occurred while rejecting the notification.");
+    }
   }
 
   @override
@@ -113,7 +147,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       message: notification['message'],
                       status: notification['status'],
                       time: notification['date'],
-                      id: notification['id'],
+                      bookingId: notification['bookingId'],
                     );
                   },
                 ),
@@ -126,7 +160,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     required String message,
     required String status,
     required String time,
-    required int id,
+    required int bookingId,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -168,12 +202,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       Row(
                         children: [
                           TextButton(
-                            onPressed: () => approveNotification(id),
+                            onPressed: () => approveNotification(bookingId),
                             child: Text('Approve',
                                 style: TextStyle(color: Colors.green)),
                           ),
                           TextButton(
-                            onPressed: () => rejectNotification(index),
+                            onPressed: () => rejectNotification(bookingId),
                             child: Text('Reject',
                                 style: TextStyle(color: Colors.red)),
                           ),

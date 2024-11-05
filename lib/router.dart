@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:mo_swd392/screens/achievement_screen.dart';
+import 'package:mo_swd392/screens/achievement_screen.dart';
 import 'package:mo_swd392/screens/mentor_profile_screen.dart';
 import 'package:mo_swd392/screens/my_blog_screen.dart';
 import 'package:mo_swd392/screens/notifications_firebase_screen.dart';
 import 'package:mo_swd392/screens/update_my_blog.dart';
 import 'package:mo_swd392/screens/profile_screen.dart';
+import 'package:mo_swd392/screens/profile_screen.dart';
+import 'package:mo_swd392/screens/specialization_screen.dart';
 import '/screens/schedule_screen.dart';
 import '/view/sign_in.dart';
 import '/view/sign_up.dart';
 import 'screens/notifications_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/home_screen/home_screen.dart';
 import 'screens/search_mentor_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'screens/blog_detail_screen.dart';
@@ -59,6 +62,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => ProfileScreen());
       case '/achievement':
         return MaterialPageRoute(builder: (_) => AchievementScreen());
+      case '/profile':
+        return MaterialPageRoute(builder: (_) => ProfileScreen());
+      case '/achievement':
+        return MaterialPageRoute(builder: (_) => AchievementScreen());
+      case '/specialization':
+        return MaterialPageRoute(builder: (_) => SpecializationScreen());
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());
     }
