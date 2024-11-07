@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../services/google/google_auth_servive.dart';
 
 class Header extends StatefulWidget {
   @override
@@ -31,6 +32,7 @@ class _HeaderState extends State<Header> {
     await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'role');
     await _storage.delete(key: 'name');
+    await GoogleAuthService().signOut();
     _checkLoginStatus();
   }
 
