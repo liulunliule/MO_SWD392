@@ -367,6 +367,7 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
       currentPage: 'search',
       body: Stack(
         children: [
+          // TextField
           Positioned(
             top: 10,
             left: 16,
@@ -399,11 +400,11 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
               ),
             ),
           ),
+          // Filter Button
           Positioned(
             top: 15.5,
             right: 16,
             child: Container(
-              margin: EdgeInsets.only(left: 10),
               decoration: BoxDecoration(
                 color: Color(0xFFB5ED3D),
                 shape: BoxShape.circle,
@@ -416,10 +417,11 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
               ),
             ),
           ),
+          // Mentor List
           Positioned(
             top: 80,
-            left: MediaQuery.of(context).size.width * 0.125,
-            right: MediaQuery.of(context).size.width * 0.125,
+            left: 40,
+            right: 40,
             bottom: 10,
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
@@ -452,7 +454,6 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                               elevation: 10,
                               color: Color(0xFFF7F9F1),
                               child: Container(
-                                padding: EdgeInsets.all(0),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
@@ -463,53 +464,45 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Builder(
-                                      builder: (context) {
-                                        double width =
-                                            MediaQuery.of(context).size.width *
-                                                0.75;
-                                        return Container(
-                                          width: width,
-                                          height: width,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(20),
-                                              topRight: Radius.circular(20),
-                                              bottomLeft: Radius.circular(15),
-                                              bottomRight: Radius.circular(15),
-                                            ),
-                                            image: DecorationImage(
-                                              image: NetworkImage(
-                                                  mentor['avatar']),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                    // Avatar
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20),
+                                        topRight: Radius.circular(20),
+                                      ),
+                                      child: AspectRatio(
+                                        aspectRatio: 1.5, // Đảm bảo tỉ lệ ảnh
+                                        child: Image.network(
+                                          mentor['avatar'],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
-                                    SizedBox(height: 15),
+                                    SizedBox(height: 10),
+                                    // Thông tin mentor
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 15.0, vertical: 15.0),
+                                          horizontal: 15.0, vertical: 10.0),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           // Specializations
-                                          SizedBox(height: 10),
                                           Text(
                                             mentor['specializationList']
                                                 .join('\n'),
                                             style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.grey),
+                                              fontSize: 16,
+                                              color: Colors.grey,
+                                            ),
                                             softWrap: true,
                                           ),
+                                          SizedBox(height: 10),
                                           // Account Name
                                           Text(
                                             mentor['accountName'],
                                             style: TextStyle(
-                                              fontSize: 20,
+                                              fontSize: 22,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.black87,
                                             ),
@@ -519,13 +512,17 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                           Row(
                                             children: [
                                               Icon(Icons.email,
-                                                  size: 18, color: Colors.grey),
+                                                  size: 20, color: Colors.grey),
                                               SizedBox(width: 5),
-                                              Text(
-                                                mentor['accountEmail'],
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 20,
+                                              Expanded(
+                                                child: Text(
+                                                  mentor['accountEmail'],
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 20,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
                                             ],
@@ -534,16 +531,20 @@ class _SearchMentorScreenState extends State<SearchMentorScreen> {
                                           SizedBox(height: 10),
                                           Row(
                                             children: [
-                                              Icon(Icons.monetization_on,
-                                                  size: 18,
-                                                  color: Colors.green),
+                                              Icon(
+                                                Icons.monetization_on,
+                                                size: 18,
+                                                color: Colors.green,
+                                              ),
                                               SizedBox(width: 5),
-                                              Text(
-                                                'Price: ${mentor['pricePerHour']}',
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.green,
+                                              Expanded(
+                                                child: Text(
+                                                  'Price: ${mentor['pricePerHour']}',
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.green,
+                                                  ),
                                                 ),
                                               ),
                                             ],

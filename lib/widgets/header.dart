@@ -114,7 +114,7 @@ class _HeaderState extends State<Header> {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        "Hello, $userName",
+                        "Hello,\n $userName",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
