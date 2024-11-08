@@ -285,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Huỷ bỏ',
+            'Cancel',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,
@@ -316,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Chỉnh sửa',
+            'Edit',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,
@@ -349,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           alignment: Alignment.center,
           child: Text(
-            'Cập nhật',
+            'Update',
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
                 color: Colors.white,

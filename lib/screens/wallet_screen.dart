@@ -136,62 +136,14 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
-                // End box balance
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // "Deposit"
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle Deposit action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightGreen,
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Deposit',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      // "Transaction History"
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle Transaction History action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orangeAccent,
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Transaction History',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
+
                 // "Select Deposit Method"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Select Deposit Method',
+                      'Transaction History',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -200,52 +152,6 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
-                // "Bank Transfer"
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle Bank Transfer action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightGreen,
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                          ),
-                          child: Text(
-                            'Bank Transfer',
-                            style: TextStyle(fontSize: 18, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle another Deposit Method action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightGreen,
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                          ),
-                          child: Text(
-                            'Other Method',
-                            style: TextStyle(fontSize: 18, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
     );
