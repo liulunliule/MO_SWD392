@@ -9,6 +9,8 @@ import '/resource/color_const.dart';
 import '/resource/form_field_widget.dart';
 import '/resource/reponsive_utils.dart';
 import '/resource/text_style.dart';
+import '../services/google/google_auth_servive.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -117,6 +119,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
             textColor: Colors.white,
             fontSize: 16.0);
       });
+    }
+  }
+
+  Future<void> googleLogin() async {
+    try {
+      User? user = await GoogleAuthService().signInWithGoogle();
+      if (user != null) {
+        log('Google Login success');
+        Navigator.pushReplacementNamed(context, '/');
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Google Sign-In failed',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      log('Google Sign-In error: $e');
+      Fluttertoast.showToast(
+        msg: 'Google Sign-In error: $e',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
@@ -335,7 +366,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             )
           ],
         ),
-        onPressed: () async {},
+        onPressed: googleLogin,
       ),
     );
   }

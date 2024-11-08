@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "853981095655",
-    "project_id": "mentor-booking-3d46a",
-    "storage_bucket": "mentor-booking-3d46a.appspot.com"
+    "project_number": "286739935790",
+    "project_id": "circuit-project-8bdd7",
+    "storage_bucket": "circuit-project-8bdd7.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:853981095655:android:b6bfa8eb5a613fc741e442",
+        "mobilesdk_app_id": "1:286739935790:android:b69dda2628786797c4a5bf",
         "android_client_info": {
           "package_name": "com.example.mo_swd392"
         }
       },
       "oauth_client": [
         {
-          "client_id": "853981095655-485ccp78tkts2e3oejkt6vvj8tgbuvra.apps.googleusercontent.com",
+          "client_id": "286739935790-nmtqt58qj74qojn18g55jnovta8l759v.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC6NlsSlo9F2uS1ts6Cc5gYI8pdBl_tOEA"
+          "current_key": "AIzaSyClQ2T6fJCRkInb9xUBo3hGCfdisNVYTjQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "853981095655-485ccp78tkts2e3oejkt6vvj8tgbuvra.apps.googleusercontent.com",
+              "client_id": "286739935790-nmtqt58qj74qojn18g55jnovta8l759v.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
