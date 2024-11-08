@@ -27,6 +27,7 @@ dependencies:
   intl: ^0.17.0
   firebase_auth: ^5.3.2
   google_sign_in: ^6.2.2
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class GoogleAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FlutterSecureStorage _storage =
-      FlutterSecureStorage(); // Initialize Flutter Secure Storage
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Hàm đăng nhập với Google
   Future<User?> signInWithGoogle() async {
@@ -15,8 +15,7 @@ class GoogleAuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        // Nếu người dùng hủy đăng nhập, trả về null
-        return null;
+        return null; // Người dùng hủy đăng nhập
       }
 
       // Lấy thông tin xác thực từ tài khoản Google
@@ -30,6 +29,12 @@ class GoogleAuthService {
       // Lưu accessToken vào Flutter Secure Storage
       await _storage.write(key: 'accessToken', value: googleAuth.accessToken);
 
+      // Giải nén `idToken`
+      Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(googleAuth.idToken!);
+      print("Thông tin giải nén từ idToken:");
+      print(decodedToken);
+
       // Tạo credential từ Google Auth
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -40,8 +45,8 @@ class GoogleAuthService {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      // Trả về thông tin người dùng đăng nhập thành công
-      return userCredential.user;
+      return userCredential
+          .user; // Trả về thông tin người dùng đăng nhập thành công
     } catch (e) {
       print("Lỗi đăng nhập Google: $e");
       return null;
