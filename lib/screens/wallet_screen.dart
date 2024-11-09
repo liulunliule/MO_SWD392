@@ -17,13 +17,16 @@ class _WalletScreenState extends State<WalletScreen> {
   double total = 0.0;
   bool isLoading = true;
   final FlutterSecureStorage _storage = FlutterSecureStorage();
+  List<dynamic> transactionHistory = []; // Danh sách lịch sử giao dịch
 
   @override
   void initState() {
     super.initState();
     fetchWalletBalance();
+    fetchTransactionHistory();
   }
 
+  // Hàm lấy số dư ví
   Future<void> fetchWalletBalance() async {
     final url = 'http://167.71.220.5:8080/wallet/view';
     try {
@@ -37,31 +40,84 @@ class _WalletScreenState extends State<WalletScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Parse the JSON response
         final data = json.decode(response.body)['data'];
         setState(() {
-          total = data['total'] ?? 0.0; // Update balance
-          isLoading = false; // Loading complete
+          total = data['total'] ?? 0.0;
+          isLoading = false;
         });
       } else {
-        // Handle error response
         setState(() {
-          isLoading = false; // Loading complete
+          isLoading = false;
         });
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load balance')),
         );
       }
     } catch (e) {
       setState(() {
-        isLoading = false; // Loading complete
+        isLoading = false;
       });
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  // Hàm lấy lịch sử giao dịch
+  Future<void> fetchTransactionHistory() async {
+    final url = 'http://167.71.220.5:8080/wallet-log/view';
+    try {
+      String? accessToken = await _storage.read(key: 'accessToken');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['data'];
+        setState(() {
+          transactionHistory = data;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load transaction history')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  // Hàm hiển thị một item của lịch sử giao dịch
+  Widget buildTransactionItem(dynamic log) {
+    String type = log['type'];
+    double amount = log['amount'];
+    String createdAt = log['createdAt'];
+    String from = log['from']?.toString() ?? 'N/A';
+    String to = log['to']?.toString() ?? 'N/A';
+
+    return ListTile(
+      leading: Icon(
+        type == 'DEPOSIT' ? Icons.arrow_downward : Icons.arrow_upward,
+        color: type == 'DEPOSIT' ? Colors.green : Colors.red,
+      ),
+      title: Text(
+        type,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text('From: $from - To: $to\nDate: $createdAt'),
+      trailing: Text(
+        '${amount.toStringAsFixed(2)} VNĐ',
+        style: TextStyle(
+          color: type == 'DEPOSIT' ? Colors.green : Colors.red,
+        ),
+      ),
+    );
   }
 
   @override
@@ -70,7 +126,7 @@ class _WalletScreenState extends State<WalletScreen> {
       title: 'Wallet',
       currentPage: 'wallet',
       body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Loading indicator
+          ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // Balance box
@@ -107,7 +163,6 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                         ),
                       ),
-                      // Balance display
                       Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +177,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              '${total.toStringAsFixed(2)} VNĐ', // Display balance with 2 decimal points
+                              '${total.toStringAsFixed(2)} VNĐ',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 36,
@@ -137,7 +192,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
                 SizedBox(height: 20),
 
-                // "Select Deposit Method"
+                // "Transaction History"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Align(
@@ -152,6 +207,16 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
+
+                // List of Transaction History
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: transactionHistory.length,
+                    itemBuilder: (context, index) {
+                      return buildTransactionItem(transactionHistory[index]);
+                    },
+                  ),
+                ),
               ],
             ),
     );
